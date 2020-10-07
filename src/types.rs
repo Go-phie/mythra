@@ -11,15 +11,15 @@ pub struct Music {
     pub source: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Engine {
-    pub name: String,
-    pub base_url: String,
-    pub search_url: String,
+    pub name: &'static str,
+    pub base_url: &'static str,
+    pub search_url: &'static str,
 }
 
 
 pub trait EngineTraits {
-    fn new(&mut self);
     fn search(&self, query:String) -> Vec<Music>;
     //    fn parse_single_music(&self, index: u32, soup: String) -> Music;
 }
