@@ -9,15 +9,19 @@ static CONFIG:Engine = Engine {
 
 impl EngineTraits for RedThreeMP3 {
     fn search(&self, _query:String) -> Vec<Music> {
-        return vec![Music{
+        let single_music = self.parse_single_music();
+        return vec![single_music]
+    }
+
+    fn parse_single_music(&self) -> Music {
+        Music{
             index: 1,
-            artiste: Some(String::from("None")), 
+            artiste: None, 
             title: String::from("whaddup cisgendered niggAs"),
             download_link: String::from("whaddup cisgendered niggAs"),
             picture_link: None,
             collection: None,
             source: String::from(CONFIG.name).to_lowercase(),
-//            source: String::from(self.engine.name)
-        }]
+        }
     }
 }

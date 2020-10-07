@@ -21,5 +21,5 @@ pub struct Engine {
 
 pub trait EngineTraits {
     fn search(&self, query:String) -> Vec<Music>;
-    //    fn parse_single_music(&self, index: u32, soup: String) -> Music;
+    fn parse_single_music(&self) -> Music;
 }
