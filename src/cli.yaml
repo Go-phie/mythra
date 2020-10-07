@@ -8,13 +8,6 @@ args:
         multiple: true
         about: Sets the level of verbosity
 subcommands:
-    - api:
-        about: starts up the package as an api
-        args:
-            - port:
-                short: p
-                long: port
-                about: port to run the api on 
     - search:
         about: search for a song on a specific engine
         args:
@@ -22,3 +15,15 @@ subcommands:
                 short: e
                 long: engine
                 about: engine to search for song on
+                default_value: redthreemp3
+            - query:
+                short: q
+                long: query
+                about: search string to use for the query
+    - api:
+        about: starts up the package as an api
+        args:
+            - port:
+                short: p
+                long: port
+                about: port to run the api on 
