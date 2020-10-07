@@ -1,0 +1,24 @@
+name: mythra
+version: "1.0"
+author: Domnan Diretnan <diretnandomnan@gmail.com>
+about: Search and Download music easily without ads and redirects
+args:
+    - verbose:
+        short: v
+        multiple: true
+        about: Sets the level of verbosity
+subcommands:
+    - api:
+        about: starts up the package as an api
+        args:
+            - port:
+                short: p
+                long: port
+                about: port to run the api on 
+    - search:
+        about: search for a song on a specific engine
+        args:
+            - engine:
+                short: e
+                long: engine
+                about: engine to search for song on

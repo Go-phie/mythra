@@ -1,0 +1,32 @@
+language: rust
+rust:
+- stable
+- beta
+- nightly
+matrix:
+  allow_failures:
+  - rust: nightly
+  fast_finish: true
+os:
+- linux
+- osx
+before_deploy:
+  - mv target/release/mythra "target/release/mythra-$TRAVIS_TAG-$TRAVIS_OS_NAME"
+deploy:
+  - provider: cargo
+    skip_cleanup: true
+    on:
+      tags: true
+      condition: "$TRAVIS_RUST_VERSION = stable && $TRAVIS_OS_NAME = linux"
+      branch: master
+    token:
+      secure: # ;)
+  - provider: releases
+    skip_cleanup: true
+    on:
+      tags: true
+      condition: "$TRAVIS_RUST_VERSION = stable"
+      branch: master
+    file:
+      - target/release/mythra-*
+    api_key: $GITHUB_TOKEN
