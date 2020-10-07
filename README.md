@@ -13,7 +13,7 @@ In my bid to learn run I am trying to make a music web scraper
 
 ### Engines
 
-- Red3Mp3
+- Mp3Red
 
 
 ## Installation

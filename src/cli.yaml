@@ -15,7 +15,7 @@ subcommands:
                 short: e
                 long: engine
                 about: engine to search for song on
-                default_value: redthreemp3
+                default_value: mp3red
             - query:
                 short: q
                 long: query

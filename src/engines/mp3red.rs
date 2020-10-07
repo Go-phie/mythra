@@ -1,14 +1,21 @@
 use crate::types::{Engine, EngineTraits, Music};
+//use std::collections::HashMap;
 
-pub struct RedThreeMP3;
+pub struct MP3Red;
 static CONFIG:Engine = Engine {
-    name: "RedThreeMP3",
-    base_url:"https://red3mp3.me",
-    search_url: "https://red3mp3.me/Search",
+    name: "MP3Red",
+    base_url:"https://mp3red.best/",
+    search_url: "https://mp3red.best/mp3/",
 };
 
-impl EngineTraits for RedThreeMP3 {
+impl EngineTraits for MP3Red {
     fn search(&self, _query:String) -> Vec<Music> {
+        let _query:&str = &_query.replace(" ", "-")[..];
+        let mut full_url: String = CONFIG.search_url.to_owned();
+        full_url.push_str(_query);
+        let client = reqwest::blocking::Client::new();
+        let res = client.get(&full_url).send();
+        println!("{:?}", res.json());
         let single_music = self.parse_single_music();
         return vec![single_music]
     }
