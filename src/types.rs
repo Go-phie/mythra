@@ -1,13 +1,18 @@
 use serde::{Serialize, Deserialize};
+use scraper::ElementRef;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Music {
-    pub index: u32,
+    // Option<> elements are struct elements
+    // that are allowed to be None
+    pub index: usize,
     pub artiste: Option<String>,
     pub title: String,
     pub collection: Option<String>,
     pub download_link: String,
     pub picture_link: Option<String>,
+    pub size: Option<String>,
+    pub duration: Option<String>,
     pub source: String,
 }
 
@@ -20,6 +25,6 @@ pub struct Engine {
 
 
 pub trait EngineTraits {
-    fn search(&self, query:String) -> Vec<Music>;
-    fn parse_single_music(&self) -> Music;
+    fn search(&self, query:String) -> Result<Vec<Music>, Box<dyn std::error::Error>>;
+    fn parse_single_music(&self, ind:usize, el:ElementRef) -> Music;
 }
