@@ -1,5 +1,6 @@
 use crate::types::{Engine, EngineTraits, Music};
 use crate::utils::extract_from_el;
+use crate::utils::cached_reqwest;
 use scraper::{Html, Selector, ElementRef};
 
 pub struct MP3Red;
@@ -14,8 +15,7 @@ impl EngineTraits for MP3Red {
         let _query:&str = &_query.replace(" ", "-")[..];
         let mut full_url: String = CONFIG.search_url.to_owned();
         full_url.push_str(_query);
-        let res = reqwest::blocking::get(&full_url)?
-            .text()?;
+        let res = cached_reqwest::get(&full_url)?;
         let document = Html::parse_document(&res[..]);
         let selector = Selector::parse("div.box-post").unwrap();
         let mut vec: Vec<Music> = Vec::new();
@@ -35,8 +35,7 @@ impl EngineTraits for MP3Red {
         let duration = extract_from_el(&element, ".duration", "text");
         let size = extract_from_el(&element, ".file-size", "text");
         let initial_download_link = extract_from_el(&element,".pull-left","href");
-        let res = reqwest::blocking::get(&initial_download_link)?
-            .text()?;
+        let res = cached_reqwest::get(&initial_download_link)?;
         let document = Html::parse_document(&res[..]);
         let dl_selector = Selector::parse(".dl-list").unwrap();
         let dl_element = document.select(&dl_selector).next().unwrap();
