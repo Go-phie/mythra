@@ -27,3 +27,5 @@ subcommands:
                 short: p
                 long: port
                 about: port to run the api on 
+    - clear-cache:
+        about: clears the mythra cache

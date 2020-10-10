@@ -21,26 +21,37 @@ impl EngineTraits for MP3Red {
         let mut vec: Vec<Music> = Vec::new();
         for (ind, element) in document.select(&selector).enumerate() {
             let single_music = self.parse_single_music(ind, element);
-            vec.push(single_music);
+            match single_music {
+                Ok(music) => vec.push(music),
+                _ => (),
+            }
         }
         return Ok(vec)
     }
 
-    fn parse_single_music(&self, ind:usize, element:ElementRef) -> Music {
+    fn parse_single_music(&self, ind:usize, element:ElementRef) -> Result<Music, Box<dyn std::error::Error>> {
         let picture_link = extract_from_el(&element, "img", "src");
         let title = extract_from_el(&element, "img", "alt");
         let duration = extract_from_el(&element, ".duration", "text");
         let size = extract_from_el(&element, ".file-size", "text");
-        Music{
+        let initial_download_link = extract_from_el(&element,".pull-left","href");
+        let res = reqwest::blocking::get(&initial_download_link)?
+            .text()?;
+        let document = Html::parse_document(&res[..]);
+        let dl_selector = Selector::parse(".dl-list").unwrap();
+        let dl_element = document.select(&dl_selector).next().unwrap();
+        let download_link = extract_from_el(&dl_element, "[class='btn']", "href");
+        
+        Ok(Music{
             index: ind+1,
             artiste: None, 
             title, 
-            download_link: String::from("whaddup cisgendered niggAs"),
+            download_link,
             picture_link: Some(picture_link),
             collection: None,
             size: Some(size),
             duration: Some(duration),
             source: String::from(CONFIG.name).to_lowercase(),
-        }
+        })
     }
 }

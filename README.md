@@ -8,7 +8,7 @@
 
 # Mythra
 
-In my bid to learn run I am trying to make a music web scraper
+In my bid to learn rust I am trying to make a music web scraper
 
 
 ### Engines

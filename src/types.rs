@@ -26,5 +26,5 @@ pub struct Engine {
 
 pub trait EngineTraits {
     fn search(&self, query:String) -> Result<Vec<Music>, Box<dyn std::error::Error>>;
-    fn parse_single_music(&self, ind:usize, el:ElementRef) -> Music;
+    fn parse_single_music(&self, ind:usize, el:ElementRef) -> Result<Music, Box<dyn std::error::Error>>;
 }
