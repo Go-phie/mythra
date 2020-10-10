@@ -1,5 +1,6 @@
 use scraper::{Selector, ElementRef};
 
+pub static CACHE_NAME: &str = ".mythra-cache";
 // Reduces the stress of repetitive extraction of elements
 // as the raw scraper library is too verbose
 pub fn extract_from_el(element:&ElementRef, selector:&str, attr:&str) -> String {
@@ -15,6 +16,22 @@ pub fn extract_from_el(element:&ElementRef, selector:&str, attr:&str) -> String 
                 tag.value().attr(others).unwrap()
                 )
         },
+    }
+}
+
+// Removes cache directory
+pub fn clear_cache(){
+    use std::fs;
+    use std::env;
+    use std::path::Path;
+    match env::current_exe() {
+        Ok(current_exe) => {
+            let path: &Path = Path::new(current_exe.to_str().unwrap());
+            let parent: &str = path.parent().unwrap().to_str().unwrap();
+            let full_dir_path = format!("{}/{}", parent, crate::utils::CACHE_NAME);
+            fs::remove_dir_all(full_dir_path).unwrap();
+        },
+        Err(_) => { () }
     }
 }
 
@@ -39,8 +56,8 @@ use std::io::{Read, Write};
                 let mut hasher = DefaultHasher::new();
                 url.hash(&mut hasher);
                 let hashed_url: &str = &(hasher.finish().to_string())[..];
-                let full_dir_path = format!("{}/cache", parent);
-                let full_path = format!("{}/cache/{}", parent, hashed_url);
+                let full_dir_path = format!("{}/{}", parent, crate::utils::CACHE_NAME);
+                let full_path = format!("{}/{}",full_dir_path, hashed_url);
                 // create all parent directories necessary
                 create_dir_all(full_dir_path)?;
                 let mut file = OpenOptions::new()
