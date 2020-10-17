@@ -3,10 +3,6 @@ version: "1.0"
 author: Domnan Diretnan <diretnandomnan@gmail.com>
 about: Search and Download music easily without ads and redirects
 args:
-    - verbose:
-        short: v
-        multiple: true
-        about: Sets the level of verbosity
 subcommands:
     - search:
         about: search for a song on a specific engine
@@ -20,6 +16,12 @@ subcommands:
                 short: q
                 long: query
                 about: search string to use for the query
+                required: true
+                default_value: mirrors
+            - verbose:
+                short: v
+                long: verbose
+                about: Sets the level of verbosity
     - api:
         about: starts up the package as an api
         args:
@@ -27,5 +29,10 @@ subcommands:
                 short: p
                 long: port
                 about: port to run the api on 
+                required: true
+            - verbose:
+                short: v
+                long: verbose
+                about: Sets the level of verbosity
     - clear-cache:
         about: clears the mythra cache

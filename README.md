@@ -10,6 +10,31 @@
 
 In my bid to learn rust I am trying to make a music web scraper
 
+In order to use either the `ncurses` or the `pancurses` backend of a dependent library `cursive`, you will need the ncurses library installed on your system.
+
+## Archlinux
+
+```
+pacman -S ncurses
+```
+
+## Ubuntu
+
+```
+apt-get install libncursesw5-dev
+```
+
+## Fedora
+
+```
+yum install ncurses-devel
+```
+
+## macOS
+
+```
+brew install ncurses
+```
 
 ### Engines
 

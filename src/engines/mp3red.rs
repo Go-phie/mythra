@@ -2,9 +2,10 @@ use crate::types::{Engine, EngineTraits, Music};
 use crate::utils::extract_from_el;
 use crate::utils::cached_reqwest;
 use scraper::{Html, Selector, ElementRef};
+use indicatif::ProgressBar;
 
 pub struct MP3Red;
-static CONFIG:Engine = Engine {
+pub static CONFIG:Engine = Engine {
     name: "MP3Red",
     base_url:"https://mp3red.best/",
     search_url: "https://mp3red.best/mp3/",
@@ -13,19 +14,27 @@ static CONFIG:Engine = Engine {
 impl EngineTraits for MP3Red {
     fn search(&self, _query:String) -> Result<Vec<Music>, Box<dyn std::error::Error>> {
         let _query:&str = &_query.replace(" ", "-")[..];
+        let bar = ProgressBar::new(100);
         let mut full_url: String = CONFIG.search_url.to_owned();
         full_url.push_str(_query);
         let res = cached_reqwest::get(&full_url)?;
         let document = Html::parse_document(&res[..]);
         let selector = Selector::parse("div.box-post").unwrap();
         let mut vec: Vec<Music> = Vec::new();
+        let elems = document.select(&selector);
+        let size = elems.count();
         for (ind, element) in document.select(&selector).enumerate() {
             let single_music = self.parse_single_music(ind, element);
             match single_music {
                 Ok(music) => vec.push(music),
                 _ => (),
             }
+            // increment progress bar
+            let inc: u64 = (100/size) as u64;
+            bar.inc(inc);
         }
+        bar.finish();
+
         return Ok(vec)
     }
 

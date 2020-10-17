@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use scraper::ElementRef;
+use std::borrow::Borrow;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Music {
@@ -14,6 +15,12 @@ pub struct Music {
     pub size: Option<String>,
     pub duration: Option<String>,
     pub source: String,
+}
+
+impl<'a> Borrow<Music> for &mut &mut Music {
+    fn borrow(&self) -> &Music {
+        self
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
