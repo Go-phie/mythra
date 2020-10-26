@@ -57,6 +57,9 @@ cargo run
 ```
 Or download from Github [Releases](https://github.com/deven96/mythra/releases)
 
+## Example
+
+<p align="center"><img src="assets/example.gif" alt="mythra example"></p>
 
 ## Deployment
 
