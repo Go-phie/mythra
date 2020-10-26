@@ -101,10 +101,10 @@ use log::debug;
                 file.read_to_string(&mut contents).unwrap();
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
-                if (&contents[..]).eq("") {
+                if (contents.as_str()).eq("") {
                     let res = reqwest::blocking::get(url)?
                         .text()?;
-                    file.write_all((&res[..]).as_bytes())?;
+                    file.write_all((res.as_str()).as_bytes())?;
                     results = res;
                 } else {
                     debug!("Retrieving {} [GET] data from cache", url);
@@ -119,26 +119,29 @@ use log::debug;
     }
 }
 
-pub fn render_select_music(songs:&'static mut Vec<Music>, title: &str){
+pub fn render_select_music(songs:Vec<Music>, title: &str){
     let mut select = SelectView::new()
         .h_align(HAlign::Center)
         .autojump();
-    for song in songs.iter_mut() {
-        let title = &(song.title)[..];
-        select.add_item(title, &mut song);
+    for song in songs {
+        let title_copy = &song.title.clone();
+        let title = title_copy.as_str();
+        select.add_item(title, song);
     }
-    select.set_on_submit(download_song);
+    select.set_on_submit(render_downloading_song);
     let mut siv = cursive::default();
-    // Let's add a ResizedView to keep the list at a reasonable size
-    // (it can scroll anyway).
+    // Let's add a ResizedView to keep the 
+    // list at a reasonable size (it can scroll anyway).
     siv.add_layer(
-        Dialog::around(select.scrollable().fixed_size((20, 10)))
+        Dialog::around(select.scrollable().fixed_size((50, 10)))
         .title(title),
         );
+    siv.run();
 }
 
-pub fn download_song(siv: &mut Cursive, song: &Music){
-    siv.pop_layer();
+pub fn render_downloading_song(siv: &mut Cursive, song: &Music){
+//    replace previous view
+//    siv.pop_layer();
     let text = format!("Downloading {} ...", song.title);
     siv.add_layer(
         Dialog::around(TextView::new(text)).button("Quit", |s| s.quit()),

@@ -17,7 +17,8 @@ pub struct Music {
     pub source: String,
 }
 
-impl<'a> Borrow<Music> for &mut &mut Music {
+// Enables borrow due to cursive cli
+impl<'a> Borrow<Music> for &mut &Music {
     fn borrow(&self) -> &Music {
         self
     }

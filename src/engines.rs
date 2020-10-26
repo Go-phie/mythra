@@ -8,11 +8,12 @@ pub fn search_all(engine:&str, query:&str) {
     match engine {
         "mp3red" => {
             let title: &str = &(format!("Searching {} for {}",
-                                      engine, &query[..]))[..];
+                                      engine, query.as_str()))[..];
             let e = mp3red::MP3Red;
-            let mut results = EngineTraits::search(&e, query)
-                            .unwrap();
-            render_select_music(&mut results, title);
+            let res = EngineTraits::search(&e, query);
+            let results = res.unwrap();
+            render_select_music(results, title);
+            // use serde_json in api search function
 //            info!("{}" ,serde_json::to_string(&results).unwrap());
         },
         _ => info!("Engine is unsupported"),

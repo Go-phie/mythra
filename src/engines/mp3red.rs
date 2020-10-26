@@ -18,7 +18,7 @@ impl EngineTraits for MP3Red {
         let mut full_url: String = CONFIG.search_url.to_owned();
         full_url.push_str(_query);
         let res = cached_reqwest::get(&full_url)?;
-        let document = Html::parse_document(&res[..]);
+        let document = Html::parse_document(res.as_str());
         let selector = Selector::parse("div.box-post").unwrap();
         let mut vec: Vec<Music> = Vec::new();
         let elems = document.select(&selector);
@@ -45,7 +45,7 @@ impl EngineTraits for MP3Red {
         let size = extract_from_el(&element, ".file-size", "text");
         let initial_download_link = extract_from_el(&element,".pull-left","href");
         let res = cached_reqwest::get(&initial_download_link)?;
-        let document = Html::parse_document(&res[..]);
+        let document = Html::parse_document(res.as_str());
         let dl_selector = Selector::parse(".dl-list").unwrap();
         let dl_element = document.select(&dl_selector).next().unwrap();
         let download_link = extract_from_el(&dl_element, "[class='btn']", "href");

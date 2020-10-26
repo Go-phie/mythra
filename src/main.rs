@@ -26,7 +26,7 @@ fn main() {
                 .unwrap();
             engines::search_all(engine, query);
         },
-        _ => println!("other commands"),
+        _ => println!("Select a valid subcommand"),
 
     }
 }
