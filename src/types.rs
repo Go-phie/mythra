@@ -36,3 +36,10 @@ pub trait EngineTraits {
     fn search(&self, query:String) -> Result<Vec<Music>, Box<dyn std::error::Error>>;
     fn parse_single_music(&self, ind:usize, el:ElementRef) -> Result<Music, Box<dyn std::error::Error>>;
 }
+
+// Music request parser for API
+#[derive(Deserialize)]
+pub struct MusicRequest {
+    pub query: String,
+    pub engine: String,
+}

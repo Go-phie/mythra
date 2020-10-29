@@ -30,6 +30,7 @@ subcommands:
                 long: port
                 about: port to run the api on 
                 required: true
+                default_value: "9000"
             - verbose:
                 short: v
                 long: verbose
