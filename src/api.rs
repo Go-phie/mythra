@@ -11,10 +11,9 @@ async fn index(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
         let engine_match = engine.as_str();
         match engine_match {
             "mp3red" => {
-//                let e = mp3red::MP3Red;
-//                let res = EngineTraits::search(&e, query);
-//                HttpResponse::Ok().json(res.unwrap())
-                HttpResponse::Ok().json("{'response': 'waduup'}")
+                let e = mp3red::MP3Red;
+                let res = EngineTraits::search(&e, query);
+                HttpResponse::Ok().json(res.unwrap())
             },
             _ => {
                 println!("Engine {} is unsupported", engine_match);
