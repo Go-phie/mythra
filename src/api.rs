@@ -1,6 +1,5 @@
 use actix_web::{http::StatusCode, web, App, HttpServer, HttpResponse};
 use crate::types::MusicRequest;
-use crate::types::EngineTraits;
 use crate::engines::mp3red;
 use std::env;
 
@@ -11,8 +10,8 @@ async fn index(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
         let engine_match = engine.as_str();
         match engine_match {
             "mp3red" => {
-                let e = mp3red::MP3Red;
-                let res = EngineTraits::search(&e, query);
+                let e = mp3red::MP3Red{};
+                let res = e.search(query).await.ok();
                 HttpResponse::Ok().json(res.unwrap())
             },
             _ => {

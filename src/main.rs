@@ -20,7 +20,7 @@ async fn main() {
                 .unwrap();
             let query = search_matches.value_of("query")
                 .unwrap();
-            engines::search_all(engine, query);
+            engines::search_all(engine, query).await;
         },
 
         Some(("api", api_matches)) => {

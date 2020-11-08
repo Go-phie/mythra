@@ -77,8 +77,6 @@ use std::hash::{Hash, Hasher};
 use std::fs::{OpenOptions, create_dir_all};
 use std::io::{Read, Write};
 use log::debug;
-use actix_web::client::Client;
-use actix_rt::System;
 
     pub async fn getter(url: &String) -> Result<String, Box<dyn std::error::Error>> {
     let mut results = String::new();
@@ -104,23 +102,14 @@ use actix_rt::System;
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
                 if (contents.as_str()).eq("") {
-//                    let res = reqwest::blocking::get(url)?
-//                        .text()?;
-//                    file.write_all((res.as_str()).as_bytes())?;
-//                    results = res;
-                let res = Client::default()
-                        .get(url)
-                        .header("User-Agent", "Actix-web")
-                        .send()
+                    let res = reqwest::get(url)
                         .await
                         .unwrap()
-                        .body()
+                        .text()
                         .await
                         .unwrap();
-                file.write_all(&res)?;
-                let as_slice = res.as_ref();
-                results = String::from_utf8_lossy(&as_slice)
-                    .into_owned();
+                    file.write_all((res.as_str()).as_bytes())?;
+                    results = res;
                 } else {
                     debug!("Retrieving {} [GET] data from cache", url);
                     results = contents;
@@ -133,11 +122,9 @@ use actix_rt::System;
         return Ok(results)
     }
 
-    pub fn get(url: &String) -> String {
+    pub async fn get(url: &String) -> String {
         let new_url = url.clone();
-        System::new("test").block_on(async move {
-            getter(&new_url).await
-        }).unwrap()
+        getter(&new_url).await.ok().unwrap()
     }
 }
 
