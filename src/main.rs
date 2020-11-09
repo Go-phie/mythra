@@ -24,7 +24,7 @@ async fn main() {
                 .unwrap();
             let query = search_matches.value_of("query")
                 .unwrap();
-            engines::search_all(engine, query).await;
+            engines::cli(engine, query).await;
         },
 
         Some(("api", api_matches)) => {
@@ -35,7 +35,7 @@ async fn main() {
             let port = api_matches.value_of("port")
                 .unwrap();
             info!("Running API on {:?}", port);
-            let server = api::server(port).await;
+            let server = api::api(port).await;
             match server {
                 Err(_) => info!("Error starting server"),
                 Ok(_) => info!("Exiting..."),
