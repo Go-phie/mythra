@@ -1,5 +1,6 @@
 pub mod mp3red;
 use crate::utils::render_select_music;
+use log::error;
 
 pub async fn search_all(engine:&str, query:&str) {
     let query = String::from(query);
@@ -12,7 +13,7 @@ pub async fn search_all(engine:&str, query:&str) {
             let results = res.await.ok().unwrap();
             render_select_music(results, title);
         },
-        _ => println!("Engine is unsupported"),
+        _ => error!("Engine is unsupported"),
 
     }
 }

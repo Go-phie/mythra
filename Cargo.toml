@@ -11,8 +11,9 @@ actix-web = { version = "3.1.0", features = ["openssl"] }
 actix-rt = "1.1.1"
 async-trait = "0.1.41"
 clap = { version = "3.0.0-beta.2", features = ["yaml"] }
+env_logger = "0.8.1"
 futures = "0.3.5"
-log = "0.4"
+log = "0.4.11"
 serde = { version = "1.0.101", features = ["derive"] }
 serde_json = "1.0.40"
 reqwest = { version = "0.10", features = ["blocking", "json"] }

@@ -1,11 +1,12 @@
 use scraper::{Selector, ElementRef};
 use log::debug;
-use log::{Record, Level, Metadata};
 use crate::types::Music;
 use cursive::views::{Dialog, SelectView, TextView};
 use cursive::align::HAlign;
 use cursive::Cursive;
 use cursive::view::{Scrollable, Resizable};
+use env_logger::Builder;
+use std::env;
 
 pub static CACHE_NAME: &str = ".mythra-cache";
 // Reduces the stress of repetitive extraction of elements
@@ -29,29 +30,11 @@ pub fn extract_from_el(element:&ElementRef, selector:&str, attr:&str) -> String 
         },
     }
 }
-
-
-pub struct SimpleLogger;
-impl log::Log for SimpleLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= Level::Info
-    }
-
-    fn log(&self, record: &Record) {
-        if self.enabled(record.metadata()) {
-            println!("{} - {}", record.level(), record.args());
-        }
-    }
-
-    fn flush(&self) {}
-}
-
             
 
 // Removes cache directory
 pub fn clear_cache(){
     use std::fs;
-    use std::env;
     use std::path::Path;
     use log::info;
     match env::current_exe() {
@@ -109,6 +92,7 @@ use log::debug;
                         .await
                         .unwrap();
                     file.write_all((res.as_str()).as_bytes())?;
+                    debug!("Retrieving {} [GET] data from web", url);
                     results = res;
                 } else {
                     debug!("Retrieving {} [GET] data from cache", url);
@@ -155,4 +139,16 @@ pub fn render_downloading_song(siv: &mut Cursive, song: &Music){
     siv.add_layer(
         Dialog::around(TextView::new(text)).button("Quit", |s| s.quit()),
         );
+}
+
+
+// configure logging
+pub fn configure_log(level: &str){
+    let logname: &str = "MYTHRA_LOG_FMT" ;
+    // activate debugging for only actix_web and mythra
+    let logfmt = format!("actix_web={},mythra={}", level, level);
+    env::set_var(logname, logfmt);
+    Builder::new()
+        .parse_env(logname)
+        .init();
 }

@@ -22,6 +22,7 @@ subcommands:
                 short: v
                 long: verbose
                 about: Sets the level of verbosity
+                default_value: info
     - api:
         about: starts up the package as an api
         args:
@@ -35,5 +36,6 @@ subcommands:
                 short: v
                 long: verbose
                 about: Sets the level of verbosity
+                default_value: info
     - clear-cache:
         about: clears the mythra cache

@@ -3,6 +3,7 @@ mod types;
 mod utils;
 mod api;
 use clap::{App, load_yaml};
+use log::{info, error};
 
 #[actix_web::main]
 async fn main() {
@@ -10,12 +11,15 @@ async fn main() {
     let matches = App::from(yaml).get_matches();
     match matches.subcommand() {
         Some(("clear-cache", _)) => {
-        // Clear cache
+            // Clear cache
             utils::clear_cache();
         },
 
         Some(("search", search_matches)) => {
-        // Search on CLI
+            // Search on CLI
+            let verbosity = search_matches.value_of("verbose")
+                .unwrap();
+            utils::configure_log(verbosity);
             let engine = search_matches.value_of("engine")
                 .unwrap();
             let query = search_matches.value_of("query")
@@ -24,18 +28,21 @@ async fn main() {
         },
 
         Some(("api", api_matches)) => {
-        // Start API server on port
+            // Start API server on port
+            let verbosity = api_matches.value_of("verbose")
+                .unwrap();
+            utils::configure_log(verbosity);
             let port = api_matches.value_of("port")
                 .unwrap();
-            println!("Running API on {:?}", port);
+            info!("Running API on {:?}", port);
             let server = api::server(port).await;
             match server {
-                Err(_) => println!("Error starting server"),
-                Ok(_) => println!("Exiting..."),
+                Err(_) => info!("Error starting server"),
+                Ok(_) => info!("Exiting..."),
             }
         },
 
-        _ => println!("Select a valid subcommand"),
+        _ => error!("Select a valid subcommand"),
 
     }
 }

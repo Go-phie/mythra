@@ -1,10 +1,11 @@
 use actix_web::{http::StatusCode, web, App, HttpServer, HttpResponse};
+use actix_web::{middleware::Logger};
 use crate::types::MusicRequest;
 use crate::engines::mp3red;
-use std::env;
+use log::{error, debug};
 
 async fn index(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
-    format!("Request for client with engine={} and query={}!", info.engine, info.query);
+    debug!("Request for client with engine={} and query={}!", info.engine, info.query);
         let query = info.query.clone();
         let engine = info.engine.clone();
         let engine_match = engine.as_str();
@@ -15,18 +16,19 @@ async fn index(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
                 HttpResponse::Ok().json(res.unwrap())
             },
             _ => {
-                println!("Engine {} is unsupported", engine_match);
+                error!("Engine {} is unsupported", engine_match);
                 HttpResponse::new(StatusCode::NOT_FOUND)
             },
         }
 }
 
 pub async fn server(port: &str) -> std::io::Result<()> {
-    env::set_var("RUST_LOG", "actix_web=debug,actix_server=info");
-//    env_logger::init();
     let address: &str = &(format!("127.0.0.1:{}", port))[..];
     HttpServer::new(|| 
-                    App::new().service(
+                    App::new()
+                    .wrap(Logger::default())
+                    .wrap(Logger::new("%a %{User-Agent}i"))
+                    .service(
                         web::resource("/search")
                         .route(
                             web::get().to(index)
