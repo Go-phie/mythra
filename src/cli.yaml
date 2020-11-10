@@ -11,7 +11,7 @@ subcommands:
                 short: e
                 long: engine
                 about: engine to search for song on
-                default_value: mp3red
+                default_value: mp3tomato
             - query:
                 short: q
                 long: query

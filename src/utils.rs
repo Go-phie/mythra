@@ -55,11 +55,66 @@ pub fn clear_cache(){
 pub mod cached_reqwest {
 use std::env;
 use std::path::Path;
-use std::collections::hash_map::DefaultHasher;
+use std::collections::{hash_map::DefaultHasher, HashMap};
 use std::hash::{Hash, Hasher};
 use std::fs::{OpenOptions, create_dir_all};
 use std::io::{Read, Write};
 use log::debug;
+
+    pub async fn poster(url: &String, params: &HashMap<&str, &str>) -> Result<String, Box<dyn std::error::Error>> {
+    let mut results = String::new();
+    match env::current_exe() {
+            Ok(exe_path) => {
+                let path: &Path = Path::new(exe_path.to_str().unwrap());
+                let parent: &str = path.parent().unwrap().to_str().unwrap();
+                // hash url 
+                let mut hasher = DefaultHasher::new();
+                let mut val_map = String::from("");
+                for (key, val) in params{
+                    val_map = val_map + &(format!("{}={}", key,val))[..]
+                }
+                let concat_url = url.to_owned() + &val_map[..];
+                concat_url.hash(&mut hasher);
+                let hashed_url: &str = &(hasher.finish().to_string())[..];
+                let full_dir_path = format!("{}/{}", parent, crate::utils::CACHE_NAME);
+                let full_path = format!("{}/{}",full_dir_path, hashed_url);
+                // create all parent directories necessary
+                create_dir_all(full_dir_path)?;
+                let mut file = OpenOptions::new()
+                    .write(true).read(true)
+                    .create(true).open(full_path)
+                    .unwrap();
+                // read file contents to String
+                let mut contents = String::new();
+                file.read_to_string(&mut contents).unwrap();
+                // if file is empty then cache does not exist
+                // then retrieve directly using reqwest
+                if (contents.as_str()).eq("") {
+                    let client = reqwest::Client::new();
+                    let res = client.post(url)
+                        .form(params)
+                        .send()
+                        .await
+                        .unwrap()
+                        .text()
+                        .await
+                        .unwrap();
+                    debug!("{}", res.as_str());
+                    file.write_all((res.as_str()).as_bytes())?;
+                    debug!("Retrieving {} [POST] data from web", url);
+                    results = res;
+                } else {
+                    debug!("Retrieving {} [POST] data from cache", url);
+                    results = contents;
+                }
+            },
+            Err(e) => {
+                format!("failed to get current exe path: {}", e);
+            },
+        };
+        return Ok(results)
+    
+    }
 
     pub async fn getter(url: &String) -> Result<String, Box<dyn std::error::Error>> {
     let mut results = String::new();
@@ -109,6 +164,11 @@ use log::debug;
     pub async fn get(url: &String) -> String {
         let new_url = url.clone();
         getter(&new_url).await.ok().unwrap()
+    }
+
+    pub async fn post(url: &String, params: &HashMap<&str, &str>) -> String {
+        let new_url = url.clone();
+        poster(&new_url, params).await.ok().unwrap()
     }
 }
 

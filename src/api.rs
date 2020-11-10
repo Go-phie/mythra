@@ -2,6 +2,7 @@ use actix_web::{http::StatusCode, web, App, HttpServer, HttpResponse};
 use actix_web::{middleware::Logger};
 use crate::types::MusicRequest;
 use crate::engines::mp3red;
+use crate::engines::mp3tomato;
 use log::{error, debug};
 
 async fn index(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
@@ -12,6 +13,11 @@ async fn index(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
         match engine_match {
             "mp3red" => {
                 let e = mp3red::MP3Red{};
+                let res = e.search(query).await.ok();
+                HttpResponse::Ok().json(res.unwrap())
+            },
+            "mp3tomato" => {
+                let e = mp3tomato::MP3Tomato{};
                 let res = e.search(query).await.ok();
                 HttpResponse::Ok().json(res.unwrap())
             },
