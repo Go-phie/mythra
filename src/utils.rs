@@ -42,8 +42,16 @@ pub fn clear_cache(){
             let path: &Path = Path::new(current_exe.to_str().unwrap());
             let parent: &str = path.parent().unwrap().to_str().unwrap();
             let full_dir_path = format!("{}/{}", parent, crate::utils::CACHE_NAME);
-            fs::remove_dir_all(full_dir_path).unwrap();
-            info!("Mythra cache cleared!");
+            match fs::remove_dir_all(full_dir_path) {
+                Ok(_) => {
+                    info!("Mythra cache cleared!");
+                }
+                Err(_) => {
+                    info!("Mythra cache does not exist");
+                }
+
+            }
+
         },
         Err(_) => { () }
     }
@@ -60,26 +68,20 @@ use std::hash::{Hash, Hasher};
 use std::fs::{OpenOptions, create_dir_all};
 use std::io::{Read, Write};
 use log::debug;
-
-    pub async fn poster(url: &String, params: &HashMap<&str, &str>) -> Result<String, Box<dyn std::error::Error>> {
-    let mut results = String::new();
-    match env::current_exe() {
-            Ok(exe_path) => {
+use fantoccini;
+//std::fs::File, String
+    
+    pub fn create_or_retrieve(url: String, exe_path: std::path::PathBuf) -> (std::fs::File, String){
                 let path: &Path = Path::new(exe_path.to_str().unwrap());
                 let parent: &str = path.parent().unwrap().to_str().unwrap();
                 // hash url 
                 let mut hasher = DefaultHasher::new();
-                let mut val_map = String::from("");
-                for (key, val) in params{
-                    val_map = val_map + &(format!("{}={}", key,val))[..]
-                }
-                let concat_url = url.to_owned() + &val_map[..];
-                concat_url.hash(&mut hasher);
+                url.hash(&mut hasher);
                 let hashed_url: &str = &(hasher.finish().to_string())[..];
                 let full_dir_path = format!("{}/{}", parent, crate::utils::CACHE_NAME);
                 let full_path = format!("{}/{}",full_dir_path, hashed_url);
                 // create all parent directories necessary
-                create_dir_all(full_dir_path)?;
+                create_dir_all(full_dir_path).ok().unwrap();
                 let mut file = OpenOptions::new()
                     .write(true).read(true)
                     .create(true).open(full_path)
@@ -87,8 +89,63 @@ use log::debug;
                 // read file contents to String
                 let mut contents = String::new();
                 file.read_to_string(&mut contents).unwrap();
+//                Ok((file, contents))
+                (file, contents)
+    }
+
+    pub async fn gecko_form(url: &String, form_selector: &str, params: &HashMap<&str, &str>) -> Result<String, Box<dyn std::error::Error>> {
+    let mut results = String::new();
+    match env::current_exe() {
+            Ok(exe_path) => {
+                let mut val_map = String::from("");
+                for (key, val) in params{
+                    val_map = val_map + &(format!("{}={}", key,val))[..]
+                }
+                let concat_url = url.to_owned() + &val_map[..];
+                let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
+                if (contents.as_str()).eq("") {
+                    let mut c = fantoccini::Client::new("http://localhost:4444").await.expect("failed to connect to WebDriver");
+                    c.goto(url).await.unwrap();
+                    let mut form =  c.form(
+                        fantoccini::Locator::Css(form_selector)
+                        ).await.unwrap();
+                    for (key, val) in params {
+                        form.set_by_name(key, val).await.unwrap();
+                    };
+                    let mut res_client = form.submit().await.unwrap();
+                    let res = res_client.source().await.unwrap();
+                    file.write_all((res.as_str()).as_bytes())?;
+                    c.close().await.unwrap();
+                    debug!("Retrieving {} [POST] data from web (fantoccini)", url);
+                    results = res;
+                } else {
+                    debug!("Retrieving {} [POST] data from cache (fantoccini)", url);
+                    results = contents;
+                }
+            },
+            Err(e) => {
+                format!("failed to get current exe path: {}", e);
+            },
+        };
+        return Ok(results)
+    
+    }
+
+    pub async fn poster(url: &String, params: &HashMap<&str, &str>) -> Result<String, Box<dyn std::error::Error>> {
+    let mut results = String::new();
+    match env::current_exe() {
+            Ok(exe_path) => {
+                // hash url 
+                let mut val_map = String::from("");
+                for (key, val) in params{
+                    val_map = val_map + &(format!("{}={}", key,val))[..]
+                }
+                let concat_url = url.to_owned() + &val_map[..];
+                // if file is empty then cache does not exist
+                // then retrieve directly using reqwest
+                let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
                 if (contents.as_str()).eq("") {
                     let client = reqwest::Client::new();
                     let res = client.post(url)
@@ -99,7 +156,6 @@ use log::debug;
                         .text()
                         .await
                         .unwrap();
-                    debug!("{}", res.as_str());
                     file.write_all((res.as_str()).as_bytes())?;
                     debug!("Retrieving {} [POST] data from web", url);
                     results = res;
@@ -120,23 +176,7 @@ use log::debug;
     let mut results = String::new();
     match env::current_exe() {
             Ok(exe_path) => {
-                let path: &Path = Path::new(exe_path.to_str().unwrap());
-                let parent: &str = path.parent().unwrap().to_str().unwrap();
-                // hash url 
-                let mut hasher = DefaultHasher::new();
-                url.hash(&mut hasher);
-                let hashed_url: &str = &(hasher.finish().to_string())[..];
-                let full_dir_path = format!("{}/{}", parent, crate::utils::CACHE_NAME);
-                let full_path = format!("{}/{}",full_dir_path, hashed_url);
-                // create all parent directories necessary
-                create_dir_all(full_dir_path)?;
-                let mut file = OpenOptions::new()
-                    .write(true).read(true)
-                    .create(true).open(full_path)
-                    .unwrap();
-                // read file contents to String
-                let mut contents = String::new();
-                file.read_to_string(&mut contents).unwrap();
+                let (mut file, contents) = create_or_retrieve(url.to_string(), exe_path);
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
                 if (contents.as_str()).eq("") {
@@ -169,6 +209,11 @@ use log::debug;
     pub async fn post(url: &String, params: &HashMap<&str, &str>) -> String {
         let new_url = url.clone();
         poster(&new_url, params).await.ok().unwrap()
+    }
+
+    pub async fn submit_by_gecko(url: &String, form_selector: &str, params: &HashMap<&str, &str>) -> String {
+        let new_url = url.clone();
+        gecko_form(&new_url, form_selector, params).await.ok().unwrap()
     }
 }
 

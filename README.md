@@ -10,6 +10,8 @@
 
 In my bid to learn rust I am trying to make a music web scraper
 
+
+
 In order to use either the `ncurses` or the `pancurses` backend of a dependent library `cursive`, you will need the ncurses library installed on your system.
 
 ## Archlinux
@@ -44,10 +46,14 @@ brew install ncurses
 ## Installation
 With Rust installed
 
+You must have [chromedriver](https://chromedriver.chromium.org/) available on path and running on port 4444
+
 ```bash
 git clone https://github.com/deven96/mythra.git
+chromedriver --port=4444 --headless
 
 # develop
+
 cargo update
 cargo run
 
@@ -74,3 +80,4 @@ This project is opened under the [GNU AGPLv3](https://github.com/deven96/mythra/
 Library/Resource | Use
 ------- | -----
 [Stoplight](https://stoplight.io) | Generating API docs
+[Fantoccini](https://github.com/jonhoo/fantoccini/) | Scraping javascript sites using chromedriver/geckodriver

@@ -11,7 +11,7 @@ subcommands:
                 short: e
                 long: engine
                 about: engine to search for song on
-                default_value: mp3tomato
+                default_value: freemp3cloud
             - query:
                 short: q
                 long: query
@@ -39,3 +39,9 @@ subcommands:
                 default_value: info
     - clear-cache:
         about: clears the mythra cache
+        args:
+            - verbose:
+                short: v
+                long: verbose
+                about: Sets the level of verbosity
+                default_value: info

@@ -10,8 +10,12 @@ async fn main() {
     let yaml = load_yaml!("cli.yaml");
     let matches = App::from(yaml).get_matches();
     match matches.subcommand() {
-        Some(("clear-cache", _)) => {
+        Some(("clear-cache", cache_matches)) => {
             // Clear cache
+            // Start API server on port
+            let verbosity = cache_matches.value_of("verbose")
+                .unwrap();
+            utils::configure_log(verbosity);
             utils::clear_cache();
         },
 

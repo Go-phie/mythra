@@ -1,5 +1,5 @@
 pub mod mp3red;
-pub mod mp3tomato;
+pub mod freemp3cloud;
 use crate::utils::render_select_music;
 use crate::types::Music;
 use log::error;
@@ -11,8 +11,8 @@ pub async fn search_all(engine:&str, query:&str) -> Result<Vec<Music>, Box<dyn s
             let e = mp3red::MP3Red{};
             e.search(query).await
         },
-        "mp3tomato" => {
-            let e = mp3tomato::MP3Tomato{};
+        "freemp3cloud" => {
+            let e = freemp3cloud::FreeMP3Cloud{};
             e.search(query).await
         },
         _ => {
