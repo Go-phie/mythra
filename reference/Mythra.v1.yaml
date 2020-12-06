@@ -1,0 +1,121 @@
+openapi: 3.0.0
+tags: []
+info:
+  title: Mythra
+  version: '1.0'
+  contact:
+    name: Diretnan Domnan
+    url: 'https://diretnan.live'
+    email: diretnandomnan@gmail.com
+  termsOfService: 'https://github.com/deven96/mythra'
+  license:
+    url: 'https://github.com/deven96/mythra/blob/master/LICENSE'
+    name: GNU Affero Public License
+  description: In my bid to learn Rust I turned to an age old friend... web scraping. I built this API to be able to search for songs and return valid details for the songs
+servers:
+  - url: 'https://gophie-mythra.herokuapp.com'
+    description: Heroku Mythra
+paths:
+  /search:
+    get:
+      summary: Search for songs
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Music'
+              examples:
+                example-1:
+                  value:
+                    - index: 17
+                      artiste: Justin Timberlake
+                      title: Mirrors
+                      collection: ''
+                      picture_link: 'https://i2.wp.com/ytimg.googleusercontent.com/vi/Zqe5NP86OCc/mqdefault.jpg?resize=96,96'
+                      download_link: 'https://mp3red.best/download/h2dg1NUx8CI'
+                      size: 7.92MB
+                      duration: '08:34'
+                      source: mp3red
+                    - index: 18
+                      artiste: Justin Timberlake
+                      title: Mirrors
+                      collection: ''
+                      picture_link: 'https://i2.wp.com/ytimg.googleusercontent.com/vi/Zqe5NP86OCc/mqdefault.jpg?resize=96,96'
+                      download_link: 'https://mp3red.best/download/h2dg1NUx8CI'
+                      size: 4.34MB
+                      duration: '05:34'
+                      source: mp3red
+      operationId: get-list
+      parameters:
+        - schema:
+            type: string
+            default: freemp3cloud
+          in: query
+          name: engine
+          description: engine to retrieve mp3 from
+          required: true
+        - schema:
+            type: string
+            default: Mirrors Justin Timberlake
+          in: query
+          name: query
+          description: query terms to use
+          required: true
+      description: Search for music
+    parameters: []
+components:
+  schemas:
+    Music:
+      title: Music
+      type: object
+      properties:
+        index:
+          type: integer
+          description: 'Index of the song, only unique to current search'
+        artiste:
+          type: string
+          description: Name of artiste on mp3
+        title:
+          type: string
+          description: Title of the mp3 song
+        collection:
+          type: string
+          description: Album the song belongs to
+        picture_link:
+          type: string
+          description: Link to cover art of the song
+        download_link:
+          type: string
+          description: Download link of the song
+        size:
+          type: string
+          description: Size of the song
+        duration:
+          type: string
+          description: Total time of the song
+        source:
+          type: string
+          description: Engine the mp3 is gotten from
+      required:
+        - index
+        - title
+        - download_link
+        - source
+      description: Music model for mythra
+      x-examples:
+        example-1:
+          index: 17
+          artiste: Justin Timberlake
+          title: Mirrors
+          collection: null
+          picture_link: 'https://i2.wp.com/ytimg.googleusercontent.com/vi/Zqe5NP86OCc/mqdefault.jpg?resize=96,96'
+          download_link: 'https://mp3red.best/download/h2dg1NUx8CI'
+          size: 7.92MB
+          duration: '08:34'
+          source: mp3red
+
