@@ -69,7 +69,7 @@ Or download from Github [Releases](https://github.com/deven96/mythra/releases)
 
 ## Deployment
 
-The deployed API version from `mythra api` is available on [Heroku](https://scalic.herokuapp.com). Please read the API documentation for usage
+The deployed API version from `mythra api` is available on [Heroku]([200~https://bisoncorps.stoplight.io/docs/mythra/reference/Mythra.v1.yaml). Please read the API documentation for usage
 
 ## License
 
