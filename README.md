@@ -1,8 +1,11 @@
 <p align="center"><img src="assets/muse.jpeg" alt="mythra" height="100px"></p>
 
 <div align="center">
-  <a href="https://travis-ci.com/deven96/mythra">
-    <img src="https://travis-ci.com/deven96/mythra.svg?branch=master" alt="Build Status">
+  <a href="https://github.com/deven96/mythra/workflows/">
+    <img src="https://github.com/deven96/mythra/workflows/Deploy%20to%20Heroku/badge.svg" alt="Deploy Status">
+  </a>
+  <a href="https://github.com/deven96/mythra/workflows/">
+    <img src="https://github.com/deven96/mythra/workflows/Build%20and%20Test/badge.svg" alt="Build Status">
   </a>
 </div>
 
@@ -58,7 +61,7 @@ cargo update
 cargo run
 
 #run the pakage
-./target/release/mythra search --query "Justin Timberlake Mirrors"
+./target/debug/mythra search --query "Justin Timberlake Mirrors"
 
 ```
 Or download from Github [Releases](https://github.com/deven96/mythra/releases)
