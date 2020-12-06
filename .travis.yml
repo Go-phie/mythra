@@ -6,34 +6,35 @@ rust:
 os: 
   - linux
   - osx
+script:
+  - cargo test && cargo build
+before_deploy: 
+  - echo "Moving Binary"
+  - mv target/debug/mythra target/debug/mythra-$TRAVIS_TAG-$TRAVIS_OS_NAME
+deploy:
+  # deploy binaries to github
+  - provider: releases
+    file: 
+      - target/debug/mythra-*
+    cleanup: false
+    token: $GITHUB_TOKEN
+    on:
+      tags: true
+      branch: master
+      condition: $TRAVIS_RUST_VERSION = stable
 
 jobs:
   include:
     - language: rust
       script:
-        - cargo test
-      before_deploy: 
-        - "echo \"Moving Binary\""
-        - "mv target/release/mythra \"target/release/mythra-$TRAVIS_TAG-$TRAVIS_OS_NAME\""
+        - cargo test && cargo build
       deploy:
-      
-        # deploy binaries to github
-        - provider: releases
-          file: 
-            - target/release/mythra-*
-          cleanup: false
-          token: $GITHUB_TOKEN
-          on:
-            tags: true
-            branch: master
-            condition: $TRAVIS_RUST_VERSION = stable
        
         # deploy to heroku
         - provider: heroku
           token: $HEROKU_PRODUCTION_API_KEY
           app: $HEROKU_APP_NAME
           on:
-            tags: true
             branch: master
             condition: $TRAVIS_OS_NAME = linux && $TRAVIS_RUST_VERSION = stable
 
