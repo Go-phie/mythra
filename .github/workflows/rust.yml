@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Curses
-      run: sudo apt-get install libncurses5-dev lib32ncurses5-dev
+      run: sudo apt-get install libncursesw5-dev
     - name: Build
       run: cargo build --verbose
     - name: Run tests
