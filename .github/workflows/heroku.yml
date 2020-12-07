@@ -1,0 +1,18 @@
+name: Deploy to Heroku
+
+on:
+  push:
+    tags: 
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.6.8 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "gophie-mythra" #Must be unique in Heroku
+          heroku_email: "gophiemythra@gmail.com"
+          procfile: "web: chromedriver --port=4444 && ./target/release/mythra api --port $PORT --verbose debug"
