@@ -22,7 +22,7 @@ impl FreeMP3Cloud {
             .collect();
         let bar = ProgressBar::new(100);
         let full_url: String = CONFIG.search_url.to_owned();
-        let res = cached_reqwest::submit_by_gecko(&full_url, ".el-input", &form_params).await;
+        let res = cached_reqwest::js_post(&full_url, ".el-input", &form_params).await;
         let document = Html::parse_document(res.as_str());
         let selector = Selector::parse(".play-item").unwrap();
         let mut vec: Vec<Music> = Vec::new();

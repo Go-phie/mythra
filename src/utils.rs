@@ -93,7 +93,7 @@ use fantoccini;
                 (file, contents)
     }
 
-    pub async fn gecko_form(url: &String, form_selector: &str, params: &HashMap<&str, &str>) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn fantoccini_form(url: &String, form_selector: &str, params: &HashMap<&str, &str>) -> Result<String, Box<dyn std::error::Error>> {
     let mut results = String::new();
     match env::current_exe() {
             Ok(exe_path) => {
@@ -211,9 +211,9 @@ use fantoccini;
         poster(&new_url, params).await.ok().unwrap()
     }
 
-    pub async fn submit_by_gecko(url: &String, form_selector: &str, params: &HashMap<&str, &str>) -> String {
+    pub async fn js_post(url: &String, form_selector: &str, params: &HashMap<&str, &str>) -> String {
         let new_url = url.clone();
-        gecko_form(&new_url, form_selector, params).await.ok().unwrap()
+        fantoccini_form(&new_url, form_selector, params).await.ok().unwrap()
     }
 }
 
