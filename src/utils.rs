@@ -106,7 +106,7 @@ use fantoccini;
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
                 if (contents.as_str()).eq("") {
-                    let mut c = fantoccini::Client::new("http://localhost:4444").await.expect("failed to connect to WebDriver");
+                    let mut c = fantoccini::Client::new("http://0.0.0.0:4444").await.expect("failed to connect to WebDriver");
                     c.goto(url).await.unwrap();
                     let mut form =  c.form(
                         fantoccini::Locator::Css(form_selector)
