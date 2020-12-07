@@ -43,7 +43,7 @@ brew install ncurses
 
 ### Engines
 
-- Mp3Red
+- FreeMP3Cloud
 
 
 ## Installation

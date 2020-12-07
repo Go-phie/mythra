@@ -29,7 +29,7 @@ async fn index(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
 }
 
 pub async fn api(port: &str) -> std::io::Result<()> {
-    let address: &str = &(format!("127.0.0.1:{}", port))[..];
+    let address: &str = &(format!("0.0.0.0:{}", port))[..];
     HttpServer::new(|| 
                     App::new()
                     .wrap(Logger::default())
