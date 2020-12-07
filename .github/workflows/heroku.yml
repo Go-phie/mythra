@@ -16,3 +16,5 @@ jobs:
           heroku_app_name: "gophie-mythra" #Must be unique in Heroku
           heroku_email: "gophiemythra@gmail.com"
           procfile: "worker: chromedriver --port=4444 --log-level=DEBUG\nweb: ./target/release/mythra api --port $PORT --verbose debug"
+        env:
+          CHROMEDRIVER_VERSION: 2.37.544315
