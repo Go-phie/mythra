@@ -1,0 +1,23 @@
+name: Deploy docs to Stoplight
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 10.x
+      env:
+        REPLACE: "#!\/usr\/bin\/env\ node" 
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 10.x
+    - run: npm -i -g @stoplight/cli@3.0.1
+    - run: sed -i "1s/.*/$REPLACE/" $(npm config get prefix)/lib/node_modules/@stoplight/cli/bin/stoplight.js
+    - run: $(npm config get prefix)/bin/stoplight publish --token ${{secrets.STOPLIGHT_TOKEN}} --url https://stoplight.io/api
