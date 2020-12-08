@@ -5,7 +5,7 @@ use crate::engines::mp3red;
 use crate::engines::freemp3cloud;
 use log::{error, debug};
 
-async fn index(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
+async fn search(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
     debug!("Request for client with engine={} and query={}!", info.engine, info.query);
         let query = info.query.clone();
         let engine = info.engine.clone();
@@ -37,7 +37,7 @@ pub async fn api(port: &str) -> std::io::Result<()> {
                     .service(
                         web::resource("/search")
                         .route(
-                            web::get().to(index)
+                            web::get().to(search)
                             )
                         )
                    )

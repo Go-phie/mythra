@@ -1,12 +1,32 @@
 <p align="center"><img src="assets/muse.jpeg" alt="mythra" height="100px"></p>
 
 <div align="center">
-  <a href="https://github.com/deven96/mythra/workflows/">
-    <img src="https://github.com/deven96/mythra/workflows/Deploy%20to%20Heroku/badge.svg" alt="Deploy Status">
-  </a>
-  <a href="https://github.com/deven96/mythra/workflows/">
-    <img src="https://github.com/deven96/mythra/workflows/Build%20and%20Test/badge.svg" alt="Build Status">
-  </a>
+  <table>
+  <tr>
+  <td>Web API</td>
+    <td>
+    <a href="https://github.com/deven96/mythra/workflows/">
+      <img src="https://github.com/deven96/mythra/workflows/Deploy%20to%20Heroku/badge.svg" alt="Deploy Status">
+    </a>
+    </td>
+  </tr>
+  <tr>
+  <td>Build and Test</td>
+    <td>
+    <a href="https://github.com/deven96/mythra/workflows/">
+      <img src="https://github.com/deven96/mythra/workflows/Build%20and%20Test/badge.svg" alt="Test Status">
+    </a>
+    </td>
+  </tr>
+  <tr>
+  <td>Documentation</td>
+    <td>
+    <a href="https://bisoncorps.stoplight.io/docs/mythra/reference/Mythra.v1.yaml/">
+      <img src="https://github.com/deven96/mythra/workflows/Deploy%20docs%20to%20Stoplight/badge.svg" alt="Docs Status">
+    </a>
+    </td>
+  </tr>
+  </table>
 </div>
 
 # Mythra
