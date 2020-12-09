@@ -13,5 +13,5 @@ jobs:
         with:
           node-version: 10.x
       - run: npm install -g @stoplight/cli@3.0.1
-      - run: sed -i "1s/.*/${{secrets.REPLACE}}/" $(npm config get prefix)/lib/node_modules/@stoplight/cli/bin/stoplight.js
+      - run: sed -i "1s/.*/#!\/usr\/bin\/env\ node/" $(npm config get prefix)/lib/node_modules/@stoplight/cli/bin/stoplight.js
       - run: $(npm config get prefix)/bin/stoplight publish --token ${{secrets.STOPLIGHT_TOKEN}} --url https://stoplight.io/api
