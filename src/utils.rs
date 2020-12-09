@@ -252,7 +252,11 @@ pub fn render_downloading_song(siv: &mut Cursive, song: &Music){
                //cb.send(Box::new(callback_func)).unwrap();
             })
             .full_width(),
-        ));
+        )
+        .button("Minimize", |siv| {
+            siv.pop_layer();
+        })
+        );
     siv.set_autorefresh(true);
 }
 
