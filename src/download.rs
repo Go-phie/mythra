@@ -1,8 +1,9 @@
 use cursive::utils::Counter;
 use reqwest::header::{HeaderValue, CONTENT_LENGTH, RANGE};
 use reqwest::StatusCode;
-use std::fs::File;
+use std::fs::OpenOptions;
 use std::borrow::Cow;
+//use std::io::Read;
 use std::str::FromStr;
 
 pub static MAX_DOWNLOAD:u64  = 1000000000;
@@ -59,7 +60,7 @@ pub fn download_from_url(counter: &Counter, url:String){
     .unwrap();
   let mut length = u64::from_str(length.to_str().unwrap()).map_err(|_| "invalid Content-Length header").unwrap();
   length = length/100;
-  let mut output_file = File::create(basename(&url, '/').to_string()).expect("failed to create file");
+  let mut output_file = OpenOptions::new().append(true).create(true).open(basename(&url, '/').to_string()).unwrap();
   let increment:u64;
   if length > CHUNK_SIZE as u64 {
       increment = MAX_DOWNLOAD/(length/CHUNK_SIZE as u64);
@@ -68,21 +69,23 @@ pub fn download_from_url(counter: &Counter, url:String){
   }
   let range_iter = PartialRangeIter::new(0, length -1, CHUNK_SIZE).unwrap();
   for range in range_iter{
-    let mut response = client.get(&url).header(RANGE, range).send().unwrap();
-    
+    let mut response = client.get(&url)
+        .header(RANGE, range).send().unwrap();
     let status = response.status();
     if !(status == StatusCode::OK || status == StatusCode::PARTIAL_CONTENT) {
       panic!("Unexpected server response: {}", status)
     }
-    std::io::copy(&mut response, &mut output_file)
-        .unwrap();
+  // TODO: Fix blocking nature of copy
+//    let out = std::io::copy(&mut response.take(CHUNK_SIZE as u64), &mut output_file)
+//        .unwrap();
+//    debug!("{:?}", out);
+    std::io::copy(&mut response, &mut output_file).unwrap();
     counter.tick(increment as usize);
   }
     
   let content = response.text().unwrap();
-  // TODO: Fix blocking nature of copy
-//  std::io::copy(&mut content.as_bytes(), &mut output_file)
-//      .unwrap();
+  std::io::copy(&mut content.as_bytes(), &mut output_file)
+      .unwrap();
 
   counter.set(MAX_DOWNLOAD as usize);
 }

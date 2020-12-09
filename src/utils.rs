@@ -240,7 +240,6 @@ pub fn render_select_music(songs:Vec<Music>, title: &str){
 
 pub fn render_downloading_song(siv: &mut Cursive, song: &Music){
 //    replace previous view
-    let _text = format!("Downloading {} ...", song.title);
     let link_copy = song.download_link.clone();
     siv.add_layer(Dialog::around(
             ProgressBar::new()
