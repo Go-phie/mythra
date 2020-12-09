@@ -1,6 +1,7 @@
 mod engines;
 mod types;
 mod utils;
+mod download;
 mod api;
 use clap::{App, load_yaml};
 use log::{info, error};

@@ -1,7 +1,8 @@
 use scraper::{Selector, ElementRef};
 use log::debug;
 use crate::types::Music;
-use cursive::views::{Dialog, SelectView, TextView};
+use crate::download::{download_from_url, MAX_DOWNLOAD};
+use cursive::views::{Dialog, ProgressBar, SelectView};
 use cursive::align::HAlign;
 use cursive::Cursive;
 use cursive::view::{Scrollable, Resizable};
@@ -239,11 +240,20 @@ pub fn render_select_music(songs:Vec<Music>, title: &str){
 
 pub fn render_downloading_song(siv: &mut Cursive, song: &Music){
 //    replace previous view
-//    siv.pop_layer();
-    let text = format!("Downloading {} ...", song.title);
-    siv.add_layer(
-        Dialog::around(TextView::new(text)).button("Quit", |s| s.quit()),
-        );
+    let _text = format!("Downloading {} ...", song.title);
+    let link_copy = song.download_link.clone();
+    siv.add_layer(Dialog::around(
+            ProgressBar::new()
+            // Full bar
+            .range(0, MAX_DOWNLOAD as usize)
+            .with_task(move |counter| {
+                // Closure called in a separate thread
+               download_from_url(&counter, link_copy.to_owned());
+               //cb.send(Box::new(callback_func)).unwrap();
+            })
+            .full_width(),
+        ));
+    siv.set_autorefresh(true);
 }
 
 
