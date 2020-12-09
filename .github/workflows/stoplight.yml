@@ -12,5 +12,5 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 10.x
-      - run: npm -i -g @stoplight/cli@5
+      - run: npm install -g @stoplight/cli@5
       - run: npx @stoplight/cli@5 push --ci-token 9ef5a1e3-7e22-42a3-9918-0cd89d671932 --url https://bisoncorps.stoplight.io
