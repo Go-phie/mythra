@@ -3,10 +3,9 @@ use reqwest::header::{HeaderValue, CONTENT_LENGTH, RANGE};
 use reqwest::StatusCode;
 use std::fs::File;
 use std::borrow::Cow;
-use log::debug;
 use std::str::FromStr;
 
-pub static MAX_DOWNLOAD:u64  = 1000;
+pub static MAX_DOWNLOAD:u64  = 1000000000;
 
 fn basename<'a>(path: &'a String, sep: char) -> Cow<'a, str> {
     let mut pieces = path.rsplit(sep);
@@ -58,12 +57,18 @@ pub fn download_from_url(counter: &Counter, url:String){
     .get(CONTENT_LENGTH)
     .ok_or("response doesn't include the content length")
     .unwrap();
-  let length = u64::from_str(length.to_str().unwrap()).map_err(|_| "invalid Content-Length header").unwrap();
+  let mut length = u64::from_str(length.to_str().unwrap()).map_err(|_| "invalid Content-Length header").unwrap();
+  length = length/100;
   let mut output_file = File::create(basename(&url, '/').to_string()).expect("failed to create file");
-  let increment = MAX_DOWNLOAD/(length/CHUNK_SIZE as u64);
-  for range in PartialRangeIter::new(0, length - 1, CHUNK_SIZE).unwrap() {
-      debug!("{:?} {:?}", length, increment);
-    let mut response = client.get(&url).header(RANGE, range).send().expect("failed to get response");
+  let increment:u64;
+  if length > CHUNK_SIZE as u64 {
+      increment = MAX_DOWNLOAD/(length/CHUNK_SIZE as u64);
+  } else {
+      increment = MAX_DOWNLOAD/length;
+  }
+  let range_iter = PartialRangeIter::new(0, length -1, CHUNK_SIZE).unwrap();
+  for range in range_iter{
+    let mut response = client.get(&url).header(RANGE, range).send().unwrap();
     
     let status = response.status();
     if !(status == StatusCode::OK || status == StatusCode::PARTIAL_CONTENT) {
@@ -75,8 +80,9 @@ pub fn download_from_url(counter: &Counter, url:String){
   }
     
   let content = response.text().unwrap();
-  std::io::copy(&mut content.as_bytes(), &mut output_file)
-      .unwrap();
+  // TODO: Fix blocking nature of copy
+//  std::io::copy(&mut content.as_bytes(), &mut output_file)
+//      .unwrap();
 
   counter.set(MAX_DOWNLOAD as usize);
 }
