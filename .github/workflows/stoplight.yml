@@ -12,5 +12,6 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 10.x
-      - run: npm install -g @stoplight/cli@5
-      - run: npx @stoplight/cli@5 push --ci-token 9ef5a1e3-7e22-42a3-9918-0cd89d671932 --url https://bisoncorps.stoplight.io
+      - run: npm install -g @stoplight/cli@3.0.1
+      - run: sed -i "1s/.*/${{secrets.REPLACE}}/" $(npm config get prefix)/lib/node_modules/@stoplight/cli/bin/stoplight.js
+      - run: $(npm config get prefix)/bin/stoplight publish --token ${{secrets.STOPLIGHT_TOKEN}} --url https://stoplight.io/api
