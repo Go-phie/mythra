@@ -12,6 +12,7 @@ actix-rt = "1.1.1"
 async-trait = "0.1.41"
 clap = { version = "3.0.0-beta.2", features = ["yaml"] }
 env_logger = "0.8.1"
+error-chain = "0.4"
 fantoccini = "0.14.2"
 futures = "0.3.5"
 log = "0.4.11"
