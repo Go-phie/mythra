@@ -4,20 +4,13 @@ on:
   push:
     branches: [ master ]
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js 10.x
-    - uses: actions/setup-node@v1
-      with:
-        node-version: 10.x
-#    - run: npm -i -g @stoplight/cli@3.0.1
-#    - run: sed -i "1s/.*/${{secrets.REPLACE}}/" $(npm config get prefix)/lib/node_modules/@stoplight/cli/bin/stoplight.js
-#    - run: $(npm config get prefix)/bin/stoplight publish --token ${{secrets.STOPLIGHT_TOKEN}} --url https://stoplight.io/api
-    - run: npm -i -g @stoplight/cli@5
-    - run: npx @stoplight/cli@5 push --ci-token 9ef5a1e3-7e22-42a3-9918-0cd89d671932 --url https://bisoncorps.stoplight.io
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+      - run: npm -i -g @stoplight/cli@5
+      - run: npx @stoplight/cli@5 push --ci-token 9ef5a1e3-7e22-42a3-9918-0cd89d671932 --url https://bisoncorps.stoplight.io
