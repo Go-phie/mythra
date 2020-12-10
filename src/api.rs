@@ -1,4 +1,5 @@
 use actix_web::{http::StatusCode, web, App, HttpServer, HttpResponse};
+use actix_cors::Cors;
 use actix_web::{middleware::Logger};
 use crate::types::MusicRequest;
 use crate::engines::mp3red;
@@ -32,6 +33,9 @@ pub async fn api(port: &str) -> std::io::Result<()> {
     let address: &str = &(format!("0.0.0.0:{}", port))[..];
     HttpServer::new(|| 
                     App::new()
+                    .wrap(Cors::default()
+                          .allowed_origin("*")
+                          )
                     .wrap(Logger::default())
                     .wrap(Logger::new("%a %{User-Agent}i"))
                     .service(
