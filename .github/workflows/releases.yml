@@ -11,27 +11,26 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{matrix.os}}
-
-  steps:
-    - uses: actions/checkout@v2
-    - name: Set GitHub tag env
-      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-    - name: Install ncurses for OS
-      run: |
-            if [ "$CURRENT_OS" == "ubuntu-latest" ]; then
-              sudo apt-get install libncursesw5-dev
-            elif [ "$CURRENT_OS" == "macos-latest" ]; then
-              brew install ncurses
-            fi
-      env:
-        CURRENT_OS: ${{matrix.os}}
-    - name: Cargo Binary Release
-      run:  cargo release
-    - name: Upload Binary to GitHub Releases
-    - uses: svenstaro/upload-release-action@v1-release
-      with:
-        repo_token: ${{secrets.GITHUB_TOKEN}}
-        file: target/release/mythra
-        asset_name: mythra-${{matrix.os}}-$GITHUB_ENV
-        tag: $GITHUB_ENV
-        overwrite: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set GitHub tag env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Install ncurses for OS
+        run: |
+              if [ "$CURRENT_OS" == "ubuntu-latest" ]; then
+                sudo apt-get install libncursesw5-dev
+              elif [ "$CURRENT_OS" == "macos-latest" ]; then
+                brew install ncurses
+              fi
+        env:
+          CURRENT_OS: ${{matrix.os}}
+      - name: Cargo Binary Release
+        run:  cargo release
+      - name: Upload Binary to GitHub Releases
+      - uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{secrets.GITHUB_TOKEN}}
+          file: target/release/mythra
+          asset_name: mythra-${{matrix.os}}-$GITHUB_ENV
+          tag: $GITHUB_ENV
+          overwrite: true
