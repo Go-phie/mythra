@@ -23,6 +23,8 @@ jobs:
             elif [ "$CURRENT_OS" == "macos-latest" ]; then
               brew install ncurses
             fi
+      env:
+        CURRENT_OS: ${{matrix.os}}
     - name: Cargo Binary Release
       run:  cargo release
     - name: Upload Binary to GitHub Releases
