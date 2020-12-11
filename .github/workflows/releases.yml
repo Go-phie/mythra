@@ -27,6 +27,6 @@ jobs:
         with:
           repo_token: ${{secrets.GITHUB_TOKEN}}
           file: target/release/mythra
-          asset_name: mythra-${{matrix.os}}-$RELEASE_VERSION
-          tag: $RELEASE_VERSION
+          asset_name: mythra-${{matrix.os}}-${RELEASE_VERSION}
+          tag: ${RELEASE_VERSION}
           overwrite: true
