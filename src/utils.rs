@@ -1,13 +1,13 @@
 use scraper::{Selector, ElementRef};
 use log::debug;
 use crate::types::Music;
-use crate::download::{download_from_url, MAX_DOWNLOAD};
-use cursive::views::{Dialog, ProgressBar, SelectView};
+use crate::download::{download_from_url, download_size};
+use cursive::views::{Dialog, TextView, ProgressBar, SelectView};
 use cursive::align::HAlign;
 use cursive::Cursive;
 use cursive::view::{Scrollable, Resizable};
 use env_logger::Builder;
-use std::env;
+use std::{env};
 
 pub static CACHE_NAME: &str = ".mythra-cache";
 // Reduces the stress of repetitive extraction of elements
@@ -227,8 +227,8 @@ pub fn render_select_music(songs:Vec<Music>, title: &str){
         let title = title_copy.as_str();
         select.add_item(title, song);
     }
-    select.set_on_submit(render_downloading_song);
     let mut siv = cursive::default();
+    select.set_on_submit(render_downloading_song);
     // Let's add a ResizedView to keep the 
     // list at a reasonable size (it can scroll anyway).
     siv.add_layer(
@@ -238,17 +238,18 @@ pub fn render_select_music(songs:Vec<Music>, title: &str){
     siv.run();
 }
 
-pub fn render_downloading_song(siv: &mut Cursive, song: &Music){
+fn render_downloading_song(siv: &mut Cursive, song: &Music){
 //    replace previous view
     let link_copy = song.download_link.clone();
+    let use_link = &link_copy[..];
+    let download_size_u64 = download_size(use_link).unwrap();
+    let cb = siv.cb_sink().clone();
     siv.add_layer(Dialog::around(
             ProgressBar::new()
-            // Full bar
-            .range(0, MAX_DOWNLOAD as usize)
+            .range(0, download_size_u64 as usize)
             .with_task(move |counter| {
-                // Closure called in a separate thread
-               download_from_url(&counter, link_copy.to_owned());
-               //cb.send(Box::new(callback_func)).unwrap();
+                download_from_url(counter, link_copy.to_owned());
+                cb.send(Box::new(completed_download)).unwrap();
             })
             .full_width(),
         )
@@ -257,6 +258,19 @@ pub fn render_downloading_song(siv: &mut Cursive, song: &Music){
         })
         );
     siv.set_autorefresh(true);
+}
+
+// complete download callback
+fn completed_download(siv: &mut Cursive) {
+    siv.set_autorefresh(false);
+    siv.pop_layer();
+    siv.add_layer(
+        Dialog::new()
+        .title("Download complete")
+        .button("Return", |siv| {
+            siv.pop_layer();
+        }),
+        );
 }
 
 
@@ -270,3 +284,4 @@ pub fn configure_log(level: &str){
         .parse_env(logname)
         .init();
 }
+

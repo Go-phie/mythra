@@ -1,91 +1,104 @@
 use cursive::utils::Counter;
-use reqwest::header::{HeaderValue, CONTENT_LENGTH, RANGE};
-use reqwest::StatusCode;
-use std::fs::OpenOptions;
-use std::borrow::Cow;
-//use std::io::Read;
-use std::str::FromStr;
+use reqwest::{Url};
+use std::{
+    fs,
+    io::{self, copy, Read},
+    path::Path,
+};
 
-pub static MAX_DOWNLOAD:u64  = 1000000000;
-
-fn basename<'a>(path: &'a String, sep: char) -> Cow<'a, str> {
-    let mut pieces = path.rsplit(sep);
-    match pieces.next() {
-        Some(p) => p.into(),
-        None => path.into(),
+fn append_frag(text: &mut String, frag: &mut String) {
+    if !frag.is_empty() {
+        let encoded = frag.chars()
+            .collect::<Vec<char>>()
+            .chunks(2)
+            .map(|ch| {
+                u8::from_str_radix(&ch.iter().collect::<String>(), 16).unwrap()
+            }).collect::<Vec<u8>>();
+        text.push_str(&std::str::from_utf8(&encoded).unwrap());
+        frag.clear();
     }
 }
 
-struct PartialRangeIter {
-  start: u64,
-  end: u64,
-  buffer_size: u32,
-}
-
-impl PartialRangeIter {
-  pub fn new(start: u64, end: u64, buffer_size: u32) -> Result<Self, &'static str> {
-    if buffer_size == 0 {
-      Err("invalid buffer_size, give a value greater than zero.")?;
+fn decode_uri(text: &str) -> String {
+    let mut output = String::new();
+    let mut encoded_ch = String::new();
+    let mut iter = text.chars();
+    while let Some(ch) = iter.next() {
+        if ch == '%' {
+            encoded_ch.push_str(&format!("{}{}", iter.next().unwrap(), iter.next().unwrap()));
+        } else {
+            append_frag(&mut output, &mut encoded_ch);
+            output.push(ch);
+        }
     }
-    Ok(PartialRangeIter {
-      start,
-      end,
-      buffer_size,
-    })
-  }
+    append_frag(&mut output, &mut encoded_ch);
+    output
 }
 
-impl Iterator for PartialRangeIter {
-  type Item = HeaderValue;
-  fn next(&mut self) -> Option<Self::Item> {
-    if self.start > self.end {
-      None
-    } else {
-      let prev_start = self.start;
-      self.start += std::cmp::min(self.buffer_size as u64, self.end - self.start + 1);
-      Some(HeaderValue::from_str(&format!("bytes={}-{}", prev_start, self.start - 1)).expect("string provided by format!"))
+pub struct DownloadProgress<R> {
+    inner: R,
+    progress_bar: Counter,
+}
+
+impl<R: Read> Read for DownloadProgress<R> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        self.inner.read(buf).map(|n| {
+            &self.progress_bar.tick(n as usize);
+            n
+        })
     }
-  }
 }
 
-pub fn download_from_url(counter: &Counter, url:String){
-  const CHUNK_SIZE: u32 = 10240;
+pub fn download_size(url: &str) -> Result<u64, String> {
+    let url = Url::parse(url).unwrap();
+    let resp = ureq::head(url.as_str()).call();
+    let total_size = {
+        if resp.ok() {
+            resp.header("Content-Length")
+                .unwrap()
+                .parse::<u64>()
+                .unwrap()
+        } else {
+            return Err(format!(
+                        "Couldn't download URL: {}. Error: {:?}",
+                        url,
+                        resp.status(),
+                        )
+                .into());
+        }
+    };
+    Ok(total_size)
+}
+
+pub fn download_from_url(counter: Counter, url:String){
+    let parsed_url = Url::parse(&url[..]).unwrap();
+    let mut request = ureq::get(url.as_str());
+
+    let segment = parsed_url.path_segments()
+        .and_then(|segments| {
+            let output = decode_uri(&segments.last().unwrap().to_owned());
+            Some(output)
+        })
+        .unwrap_or("tmp.bin".to_owned());
+     
+    let file = Path::new(&segment);
     
-  let client = reqwest::blocking::Client::new();
-  let response = client.head(&url).send().expect("failed to get head");
-  let length = response
-    .headers()
-    .get(CONTENT_LENGTH)
-    .ok_or("response doesn't include the content length")
-    .unwrap();
-  let mut length = u64::from_str(length.to_str().unwrap()).map_err(|_| "invalid Content-Length header").unwrap();
-  length = length/100;
-  let mut output_file = OpenOptions::new().append(true).create(true).open(basename(&url, '/').to_string()).unwrap();
-  let increment:u64;
-  if length > CHUNK_SIZE as u64 {
-      increment = MAX_DOWNLOAD/(length/CHUNK_SIZE as u64);
-  } else {
-      increment = MAX_DOWNLOAD/length;
-  }
-  let range_iter = PartialRangeIter::new(0, length -1, CHUNK_SIZE).unwrap();
-  for range in range_iter{
-    let mut response = client.get(&url)
-        .header(RANGE, range).send().unwrap();
-    let status = response.status();
-    if !(status == StatusCode::OK || status == StatusCode::PARTIAL_CONTENT) {
-      panic!("Unexpected server response: {}", status)
+    // if file already exists
+    if file.exists() {
+        let size = file.metadata().unwrap().len() - 1;
+        request = request.set("Content-Length", &(format!("bytes={}-", size))[..]).build();
+        &counter.set(size as usize);
     }
-  // TODO: Fix blocking nature of copy
-//    let out = std::io::copy(&mut response.take(CHUNK_SIZE as u64), &mut output_file)
-//        .unwrap();
-//    debug!("{:?}", out);
-    std::io::copy(&mut response, &mut output_file).unwrap();
-    counter.tick(increment as usize);
-  }
-    
-  let content = response.text().unwrap();
-  std::io::copy(&mut content.as_bytes(), &mut output_file)
-      .unwrap();
 
-  counter.set(MAX_DOWNLOAD as usize);
+    let mut source = DownloadProgress {
+        progress_bar: counter,
+        inner: request.call().into_reader(),
+    };
+    let mut dest = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&file)
+        .unwrap();
+    
+    copy(&mut source, &mut dest).unwrap();
 }

@@ -1,0 +1,36 @@
+name: Release to GitHub
+
+on:
+  push:
+    tags: 
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{matrix.os}}
+
+  steps:
+    - name: Checkout Code
+    - uses: actions/checkout@v2
+    - name: Set GitHub tag env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - name: Install ncurses for OS
+      run: |
+            if [ "$CURRENT_OS" == "ubuntu-latest" ]; then
+              sudo apt-get install libncursesw5-dev
+            elif [ "$CURRENT_OS" == "macos-latest" ]; then
+              brew install ncurses
+            fi
+    - name: Cargo Binary Release
+      run:  cargo release
+    - name: Upload Binary to GitHub Releases
+    - uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{secrets.GITHUB_TOKEN}}
+        file: target/release/mythra
+        asset_name: mythra-${{matrix.os}}-$GITHUB_ENV
+        tag: $GITHUB_ENV
+        overwrite: true

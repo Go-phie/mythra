@@ -5,7 +5,7 @@
   <tr>
   <td>Web API</td>
     <td>
-    <a href="https://github.com/deven96/mythra/workflows/">
+    <a href="https://github.com/deven96/mythra/actions/">
       <img src="https://github.com/deven96/mythra/workflows/Deploy%20to%20Heroku/badge.svg" alt="Deploy Status">
     </a>
     </td>
@@ -13,7 +13,7 @@
   <tr>
   <td>Build and Test</td>
     <td>
-    <a href="https://github.com/deven96/mythra/workflows/">
+    <a href="https://github.com/deven96/mythra/actions/">
       <img src="https://github.com/deven96/mythra/workflows/Build%20and%20Test/badge.svg" alt="Test Status">
     </a>
     </td>
@@ -23,6 +23,14 @@
     <td>
     <a href="https://bisoncorps.stoplight.io/docs/mythra/reference/Mythra.v1.yaml/">
       <img src="https://github.com/deven96/mythra/workflows/Deploy%20docs%20to%20Stoplight/badge.svg" alt="Docs Status">
+    </a>
+    </td>
+  </tr>
+  <tr>
+  <td>Releases</td>
+    <td>
+    <a href="https://github.com/deven96/mythra/releases">
+      <img src="https://github.com/deven96/mythra/workflows/Release%20to%20GitHub/badge.svg" alt="Releases Status">
     </a>
     </td>
   </tr>
