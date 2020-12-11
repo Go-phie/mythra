@@ -13,9 +13,7 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v2
-      - name: Set GitHub tag env
       - run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-      - name: Install ncurses for OS
       - run: |
               if [ "$CURRENT_OS" == "ubuntu-latest" ]; then
                 sudo apt-get install libncursesw5-dev
@@ -24,9 +22,7 @@ jobs:
               fi
         env:
           CURRENT_OS: ${{matrix.os}}
-      - name: Cargo Binary Release
       - run:  cargo release
-      - name: Upload Binary to GitHub Releases
       - uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{secrets.GITHUB_TOKEN}}
