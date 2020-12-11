@@ -1,11 +1,9 @@
 name: Deploy to Heroku
 
 on:
-  workflow_run:
-    workflows: ["Release to GitHub"]
-    branches: [main]
-    types:
-      - completed
+  push:
+    tags: 
+      - 'v*'
 
 jobs:
   build:
