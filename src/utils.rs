@@ -2,7 +2,7 @@ use scraper::{Selector, ElementRef};
 use log::debug;
 use crate::types::Music;
 use crate::download::{download_from_url, download_size};
-use cursive::views::{Dialog, TextView, ProgressBar, SelectView};
+use cursive::views::{Dialog, ProgressBar, SelectView};
 use cursive::align::HAlign;
 use cursive::Cursive;
 use cursive::view::{Scrollable, Resizable};
