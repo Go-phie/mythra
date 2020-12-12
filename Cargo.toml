@@ -1,20 +1,20 @@
 [package]
 name = "mythra"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Diretnan Domnan <diretnandomnan@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = { version = "3.1.0", features = ["openssl"] }
+actix-web = { version = "3.3.2", features = ["openssl"] }
 actix-cors = "0.5.3"
 actix-rt = "1.1.1"
 async-trait = "0.1.41"
 clap = { version = "3.0.0-beta.2", features = ["yaml"] }
 cursive = "0.15.0"
 env_logger = "0.8.1"
-error-chain = "0.4"
+error-chain = "0.12"
 fantoccini = "0.14.2"
 futures = "0.3.5"
 indicatif = "0.15.0"

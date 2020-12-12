@@ -1,19 +1,18 @@
 use cursive::utils::Counter;
-use reqwest::{Url};
-use std::{
-    fs,
-    io::{self, copy, Read},
-    path::Path,
-};
+use reqwest::Url;
+
+use std::fs;
+use std::io::{self, copy, Read};
+use std::path::Path;
 
 fn append_frag(text: &mut String, frag: &mut String) {
     if !frag.is_empty() {
-        let encoded = frag.chars()
+        let encoded = frag
+            .chars()
             .collect::<Vec<char>>()
             .chunks(2)
-            .map(|ch| {
-                u8::from_str_radix(&ch.iter().collect::<String>(), 16).unwrap()
-            }).collect::<Vec<u8>>();
+            .map(|ch| u8::from_str_radix(&ch.iter().collect::<String>(), 16).unwrap())
+            .collect::<Vec<u8>>();
         text.push_str(&std::str::from_utf8(&encoded).unwrap());
         frag.clear();
     }
@@ -59,34 +58,34 @@ pub fn download_size(url: &str) -> Result<u64, String> {
                 .parse::<u64>()
                 .unwrap()
         } else {
-            return Err(format!(
-                        "Couldn't download URL: {}. Error: {:?}",
-                        url,
-                        resp.status(),
-                        )
-                .into());
+            return Err(
+                format!("Couldn't download URL: {}. Error: {:?}", url, resp.status(),).into(),
+            );
         }
     };
     Ok(total_size)
 }
 
-pub fn download_from_url(counter: Counter, url:String){
+pub fn download_from_url(counter: Counter, url: String) {
     let parsed_url = Url::parse(&url[..]).unwrap();
     let mut request = ureq::get(url.as_str());
 
-    let segment = parsed_url.path_segments()
+    let segment = parsed_url
+        .path_segments()
         .and_then(|segments| {
             let output = decode_uri(&segments.last().unwrap().to_owned());
             Some(output)
         })
         .unwrap_or("tmp.bin".to_owned());
-     
+
     let file = Path::new(&segment);
-    
+
     // if file already exists
     if file.exists() {
         let size = file.metadata().unwrap().len() - 1;
-        request = request.set("Content-Length", &(format!("bytes={}-", size))[..]).build();
+        request = request
+            .set("Content-Length", &(format!("bytes={}-", size))[..])
+            .build();
         &counter.set(size as usize);
     }
 
@@ -99,6 +98,6 @@ pub fn download_from_url(counter: Counter, url:String){
         .append(true)
         .open(&file)
         .unwrap();
-    
+
     copy(&mut source, &mut dest).unwrap();
 }

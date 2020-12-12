@@ -1,6 +1,9 @@
-use serde::{Serialize, Deserialize};
 use scraper::ElementRef;
+use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
+
+// Result type.
+pub type MythraResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Music {
@@ -31,10 +34,9 @@ pub struct Engine {
     pub search_url: &'static str,
 }
 
-
 pub trait EngineTraits {
-    fn search(&self, query:String) -> Result<Vec<Music>, Box<dyn std::error::Error>>;
-    fn parse_single_music(&self, ind:usize, el:ElementRef) -> Result<Music, Box<dyn std::error::Error>>;
+    fn search(&self, query: String) -> MythraResult<Vec<Music>>;
+    fn parse_single_music(&self, ind: usize, el: ElementRef) -> MythraResult<Music>;
 }
 
 // Music request parser for API
