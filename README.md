@@ -43,7 +43,6 @@ brew install ncurses
 ### Engines
 
 - FreeMP3Cloud
-- MP3Red
 
 ## Installation
 
@@ -75,6 +74,10 @@ Or download from Github [Releases](https://github.com/deven96/mythra/releases)
 ## Deployment
 
 The deployed API version from `mythra api` is available. Please read the [API documentation](https://bisoncorps.stoplight.io/docs/mythra/reference/Mythra.v1.yaml) for usage
+
+## Roadmap
+
+View [Roadmap](https://github.com/deven96/mythra/pull/3#issue-537670800) discussion
 
 ## License
 
