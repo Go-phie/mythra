@@ -3,29 +3,30 @@ use crate::utils::cached_reqwest;
 use crate::utils::extract_from_el;
 
 use indicatif::ProgressBar;
+use log::debug;
 use scraper::{ElementRef, Html, Selector};
 
-pub struct MP3Red;
+use std::collections::HashMap;
+
+pub struct MP3S;
 pub static CONFIG: Engine = Engine {
-    name: "MP3Red",
-    base_url: "https://mp3red.best/",
-    search_url: "https://mp3red.best/mp3/",
+    name: "MP3S",
+    base_url: "https://mp3s.cloud/",
+    search_url: "https://mp3s.cloud/",
 };
 
-impl MP3Red {
+impl MP3S {
     pub async fn search(&self, _query: String) -> MythraResult<Vec<Music>> {
-        let _query: &str = &_query.replace(" ", "-")[..];
+        let _query: &str = &_query[..];
+        let form_params: HashMap<&str, &str> = [("searchSong", _query)].iter().cloned().collect();
         let bar = ProgressBar::new(100);
-        let mut full_url: String = CONFIG.search_url.to_owned();
-        full_url.push_str(_query);
-
-        let res = cached_reqwest::get(&full_url).await;
+        let full_url: String = CONFIG.search_url.to_owned();
+        let res = cached_reqwest::js_post(&full_url, ".el-input", &form_params).await;
         let document = Html::parse_document(res.as_str());
-        let selector = Selector::parse("div.box-post").unwrap();
+        let selector = Selector::parse(".play-item").unwrap();
         let mut vec: Vec<Music> = Vec::new();
         let elems = document.select(&selector);
         let size = elems.count();
-
         for (ind, element) in document.select(&selector).enumerate() {
             let single_music = self.parse_single_music(ind, element).await;
             match single_music {
@@ -42,25 +43,20 @@ impl MP3Red {
     }
 
     pub async fn parse_single_music(&self, ind: usize, element: ElementRef<'_>) -> Option<Music> {
-        let picture_link = extract_from_el(&element, "img", "src");
-        let title = extract_from_el(&element, "img", "alt");
-        let duration = extract_from_el(&element, ".duration", "text");
-        let size = extract_from_el(&element, ".file-size", "text");
-        let initial_download_link = extract_from_el(&element, ".pull-left", "href");
-        let res = cached_reqwest::get(&initial_download_link).await;
-        let document = Html::parse_document(res.as_str());
-        let dl_selector = Selector::parse(".dl-list").unwrap();
-        let dl_element = document.select(&dl_selector).next().unwrap();
-        let download_link = extract_from_el(&dl_element, "[class='btn']", "href");
+        let title = extract_from_el(&element, ".s-title", "text");
+        let artiste = extract_from_el(&element, ".s-artist", "text");
+        let duration = extract_from_el(&element, ".s-time", "text");
+        let download_link = extract_from_el(&element, ".play-ctrl", "data-src");
+        debug!("Retrieving song with title -> {}", title);
 
         Some(Music {
             index: ind + 1,
-            artiste: None,
+            artiste: Some(artiste),
             title,
             download_link,
-            picture_link: Some(picture_link),
+            picture_link: None,
             collection: None,
-            size: Some(size),
+            size: None,
             duration: Some(duration),
             source: String::from(CONFIG.name).to_lowercase(),
         })

@@ -43,6 +43,7 @@ brew install ncurses
 ### Engines
 
 - FreeMP3Cloud
+- MP3S
 
 ## Installation
 
