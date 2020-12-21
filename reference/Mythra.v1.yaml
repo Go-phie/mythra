@@ -37,24 +37,24 @@ paths:
                       title: Mirrors
                       collection: ''
                       picture_link: 'https://i2.wp.com/ytimg.googleusercontent.com/vi/Zqe5NP86OCc/mqdefault.jpg?resize=96,96'
-                      download_link: 'https://mp3red.best/download/h2dg1NUx8CI'
+                      download_link: 'https://mp3.cloud/download/h2dg1NUx8CI'
                       size: 7.92MB
                       duration: '08:34'
-                      source: mp3red
+                      source: mp3s
                     - index: 18
                       artiste: Justin Timberlake
                       title: Mirrors
                       collection: ''
                       picture_link: 'https://i2.wp.com/ytimg.googleusercontent.com/vi/Zqe5NP86OCc/mqdefault.jpg?resize=96,96'
-                      download_link: 'https://mp3red.best/download/h2dg1NUx8CI'
+                      download_link: 'https://mp3.cloud/download/h2dg1NUx8CI'
                       size: 4.34MB
                       duration: '05:34'
-                      source: mp3red
+                      source: mp3s
       operationId: get-list
       parameters:
         - schema:
             type: string
-            default: freemp3cloud
+            default: mp3s
           in: query
           name: engine
           description: engine to retrieve mp3 from
@@ -114,8 +114,8 @@ components:
           title: Mirrors
           collection: null
           picture_link: 'https://i2.wp.com/ytimg.googleusercontent.com/vi/Zqe5NP86OCc/mqdefault.jpg?resize=96,96'
-          download_link: 'https://mp3red.best/download/h2dg1NUx8CI'
+          download_link: 'https://mp3.cloud/download/h2dg1NUx8CI'
           size: 7.92MB
           duration: '08:34'
-          source: mp3red
+          source: mp3s
 

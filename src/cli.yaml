@@ -1,5 +1,5 @@
 name: mythra
-version: "1.0"
+version: "0.1.9"
 author: Domnan Diretnan <diretnandomnan@gmail.com>
 about: Search and Download music easily without ads and redirects
 args:
@@ -11,7 +11,7 @@ subcommands:
                 short: e
                 long: engine
                 about: engine to search for song on
-                default_value: freemp3cloud
+                default_value: mp3s
             - query:
                 short: q
                 long: query

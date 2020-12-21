@@ -1529,7 +1529,7 @@ dependencies = [
 
 [[package]]
 name = "mythra"
-version = "0.1.1"
+version = "0.1.9"
 dependencies = [
  "actix-cors 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "actix-rt 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",

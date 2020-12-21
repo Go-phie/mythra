@@ -1,5 +1,5 @@
 use crate::engines::freemp3cloud;
-use crate::engines::mp3red;
+use crate::engines::mp3s;
 use crate::types::MusicRequest;
 
 use actix_web::{http::StatusCode, web, App, HttpResponse, HttpServer};
@@ -16,13 +16,13 @@ async fn search(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
     let engine = info.engine.clone();
     let engine_match = engine.as_str();
     match engine_match {
-        "mp3red" => {
-            let e = mp3red::MP3Red {};
+        "freemp3cloud" => {
+            let e = freemp3cloud::FreeMP3Cloud {};
             let res = e.search(query).await.ok();
             HttpResponse::Ok().json(res.unwrap())
         }
-        "freemp3cloud" => {
-            let e = freemp3cloud::FreeMP3Cloud {};
+        "mp3s" => {
+            let e = mp3s::MP3S {};
             let res = e.search(query).await.ok();
             HttpResponse::Ok().json(res.unwrap())
         }
