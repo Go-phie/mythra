@@ -22,14 +22,11 @@ impl MP3Clan {
         rest_query = rest_query.replace(" ", "_") + ".html";
         let mut new_query = "mp3/".to_owned();
         new_query.push_str(&rest_query);
-        let _query= &new_query[..];
-        let form_params: HashMap<&str, &str> = [("search", _query)].iter().cloned().collect();
         let bar = ProgressBar::new(100);
-        let full_url: String = CONFIG.search_url.to_owned();
-        let res = cached_reqwest::_js_post(&full_url, _query, &form_params).await;
+        let mut full_url: String = CONFIG.search_url.to_owned();
+        full_url.push_str(&new_query);
+        let res = cached_reqwest::get(&full_url).await;
         let document = Html::parse_document(res.as_str());
-        //info!("document: {:?}", document);
-        info!("response -> {}", _query);
         let selector = Selector::parse(".unplaying").unwrap();
         let mut vec: Vec<Music> = Vec::new();
         let elems = document.select(&selector);

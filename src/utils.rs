@@ -198,44 +198,6 @@ pub mod cached_reqwest {
         };
         Ok(results)
     }
-    pub async fn _fantoccini(
-        url: &String,
-        search_str: &str,
-        params: &HashMap<&str, &str>,
-    ) -> MythraResult<String> {
-        let results = match env::current_exe() {
-            Ok(exe_path) => {
-                let mut val_map = String::from("");
-                for (key, val) in params {
-                    val_map = val_map + &(format!("{}={}", key, val))[..]
-                }
-                let concat_url = url.to_owned() + &val_map[..];
-                let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
-                // if file is empty then cache does not exist
-                // then retrieve directly using reqwest
-                if (contents.as_str()).eq("") {
-                    let mut c = fantoccini::Client::new("http://localhost:4444")
-                        .await
-                        .expect("failed to connect to WebDriver");
-                    let full_url = url.to_owned().clone() + search_str;
-                    c.goto(&full_url).await.unwrap();
-                    let res = c.source().await.unwrap();
-                    file.write_all((res.as_str()).as_bytes())?;
-                    c.close().await.unwrap();
-                    debug!("Retrieving {} [POST] data from web (fantoccini)", url);
-                    res
-                } else {
-                    debug!("Retrieving {} [POST] data from cache (fantoccini)", url);
-                    contents
-                }
-            }
-            Err(e) => {
-                return Err(Box::new(e));
-                // format!("failed to get current exe path: {}", e);
-            }
-        };
-        Ok(results)
-    }
 
     pub async fn getter(url: &String) -> MythraResult<String> {
         let mut results = String::new();
@@ -266,17 +228,6 @@ pub mod cached_reqwest {
         getter(&new_url).await.ok().unwrap()
     }
 
-    pub async fn _js_post(
-        url: &String,
-        search_str: &str,
-        params: &HashMap<&str, &str>,
-    ) -> String {
-        let new_url = url.clone();
-        _fantoccini(&new_url, search_str, params)
-            .await
-            .ok()
-            .unwrap()
-    }
     pub async fn js_post(
         url: &String,
         form_selector: &str,
