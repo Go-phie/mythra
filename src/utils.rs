@@ -231,12 +231,11 @@ pub mod cached_reqwest {
     }
 
     pub async fn post(url: &String, query: &str) -> MythraResult<String> {
-        let new_url = url.clone();
         let query = query.to_owned();
         let mut results = String::new();
         match env::current_exe() {
             Ok(exe_path) => {
-                let (mut file, contents) = create_or_retrieve(new_url.to_string(), exe_path);
+                let (mut file, contents) = create_or_retrieve(url.to_string(), exe_path);
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
                 if (contents.as_str()).eq("") {
@@ -246,7 +245,7 @@ pub mod cached_reqwest {
                         ("page", "0"),
                     ];
                     let res = reqwest::Client::new()
-                        .post(&new_url)
+                        .post(url)
                         .form(&form_data).send()
                         .await?.text().await?;
                     file.write_all((res.as_str()).as_bytes())?;
