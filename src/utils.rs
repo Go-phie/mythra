@@ -122,9 +122,11 @@ pub fn configure_log(level: &str) {
 // Wrapper around the reqwest module
 // Retrieve web pages from cache if they exist
 // else retrieve from url
+
 pub mod cached_reqwest {
     #[allow(dead_code)]
     use super::*;
+    
 
     pub fn create_or_retrieve(
         url: String,
@@ -226,6 +228,41 @@ pub mod cached_reqwest {
     pub async fn get(url: &String) -> String {
         let new_url = url.clone();
         getter(&new_url).await.ok().unwrap()
+    }
+
+    pub async fn post(url: &String, query: &str) -> MythraResult<String> {
+        let new_url = url.clone();
+        let query = query.to_owned();
+        let mut results = String::new();
+        match env::current_exe() {
+            Ok(exe_path) => {
+                let (mut file, contents) = create_or_retrieve(new_url.to_string(), exe_path);
+                // if file is empty then cache does not exist
+                // then retrieve directly using reqwest
+                if (contents.as_str()).eq("") {
+                    let form_data = [
+                        ("q", query.as_str()),
+                        ("sort", "2"),
+                        ("page", "0"),
+                    ];
+                    let res = reqwest::Client::new()
+                        .post(&new_url)
+                        .form(&form_data).send()
+                        .await?.text().await?;
+                    file.write_all((res.as_str()).as_bytes())?;
+                    debug!("Retrieving {} [POST] data from web", url);
+                    results = res;
+                } else {
+                    debug!("Retrieving {} [POST] data from cache", url);
+                    results = contents;
+                }
+            }
+            Err(e) => {
+                format!("failed to get current exe path: {}", e);
+            }
+        };
+        Ok(results)
+
     }
 
     pub async fn js_post(

@@ -4,29 +4,24 @@ use crate::utils::extract_from_el;
 
 use indicatif::ProgressBar;
 use log::debug;
-use log::info;
 use scraper::{ElementRef, Html, Selector};
 
-use std::collections::HashMap;
 
-pub struct MP3Clan;
+pub struct MyFreeMP3;
 pub static CONFIG: Engine = Engine {
-    name: "mp3clan",
+    name: "myfreemp3",
     base_url: "http://mp3clan.top/",
-    search_url: "http://mp3clan.top/",
+    search_url: "https://my-free-mp3.vip/api/search.php",
 };
 
-impl MP3Clan {
+impl MyFreeMP3 {
     pub async fn search(&self, _query: String) -> MythraResult<Vec<Music>> {
-        let mut rest_query= String::from(&_query[..]);
-        rest_query = rest_query.replace(" ", "_") + ".html";
-        let mut new_query = "mp3/".to_owned();
-        new_query.push_str(&rest_query);
+        let mut _query= String::from(&_query[..]);
         let bar = ProgressBar::new(100);
-        let mut full_url: String = CONFIG.search_url.to_owned();
-        full_url.push_str(&new_query);
-        let res = cached_reqwest::get(&full_url).await;
-        let document = Html::parse_document(res.as_str());
+        let full_url: String = CONFIG.search_url.to_owned();
+        let res = cached_reqwest::post(&full_url,&_query).await;
+        debug!("Retrieving song with response -> {:?}", res);
+        let document = Html::parse_document("test");
         let selector = Selector::parse(".unplaying").unwrap();
         let mut vec: Vec<Music> = Vec::new();
         let elems = document.select(&selector);

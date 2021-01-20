@@ -1,6 +1,6 @@
 pub mod freemp3cloud;
 pub mod mp3s;
-pub mod mp3clan;
+pub mod myfreemp3;
 
 use crate::types::{Music, MythraResult};
 use crate::utils::render_select_music;
@@ -18,8 +18,8 @@ pub async fn search_all(engine: &str, query: &str) -> MythraResult<Vec<Music>> {
             let e = mp3s::MP3S {};
             e.search(query).await
         }
-        "mp3clan" => {
-            let e = mp3clan::MP3Clan {};
+        "myfreemp3" => {
+            let e = myfreemp3::MyFreeMP3 {};
             e.search(query).await
         }
         _ => {
