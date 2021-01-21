@@ -30,11 +30,11 @@ pub fn extract_from_el(element: &ElementRef, selector: &str, attr: &str) -> Stri
             return tag.text().collect::<String>();
         }
         others => {
-            let val = String::from(tag.value().attr(others).unwrap());
-            if others.eq("href") {
-                debug!("Retrieved link {}", val)
-            };
-            return val;
+            //let val = String::from(tag.value().attr(others).unwrap());
+            //if others.eq("href") {
+            //    debug!("Retrieved link {}", val)
+            //};
+            return others.to_owned();
         }
     }
 }
