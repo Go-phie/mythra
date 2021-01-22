@@ -40,7 +40,7 @@ paths:
                       download_link: 'https://mp3.cloud/download/h2dg1NUx8CI'
                       size: 7.92MB
                       duration: '08:34'
-                      source: mp3s
+                      source: myfreemp3
                     - index: 18
                       artiste: Justin Timberlake
                       title: Mirrors
@@ -49,12 +49,12 @@ paths:
                       download_link: 'https://mp3.cloud/download/h2dg1NUx8CI'
                       size: 4.34MB
                       duration: '05:34'
-                      source: mp3s
+                      source: myfreemp3
       operationId: get-list
       parameters:
         - schema:
             type: string
-            default: mp3s
+            default: myfreemp3
           in: query
           name: engine
           description: engine to retrieve mp3 from
@@ -117,5 +117,5 @@ components:
           download_link: 'https://mp3.cloud/download/h2dg1NUx8CI'
           size: 7.92MB
           duration: '08:34'
-          source: mp3s
+          source: myfreemp3
 
