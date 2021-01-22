@@ -122,9 +122,11 @@ pub fn configure_log(level: &str) {
 // Wrapper around the reqwest module
 // Retrieve web pages from cache if they exist
 // else retrieve from url
+
 pub mod cached_reqwest {
     #[allow(dead_code)]
     use super::*;
+    
 
     pub fn create_or_retrieve(
         url: String,
@@ -228,6 +230,39 @@ pub mod cached_reqwest {
         getter(&new_url).await.ok().unwrap()
     }
 
+    pub async fn post(url: &String, params: &[(&str, &str)]) -> MythraResult<String> {
+        let mut results = String::new();
+        match env::current_exe() {
+            Ok(exe_path) => {
+                let mut val_map = String::from("");
+                    for (key, val) in params {
+                      val_map = val_map + &(format!("{}={}", key, val))[..]
+                 }
+                let concat_url = url.to_owned() + &val_map[..];
+                let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
+                // if file is empty then cache does not exist
+                // then retrieve directly using reqwest
+                if (contents.as_str()).eq("") {
+                    let res = reqwest::Client::new()
+                        .post(url)
+                        .form(&params).send()
+                        .await?.text().await?;
+                    file.write_all((res.as_str()).as_bytes())?;
+                    debug!("Retrieving {} [POST] data from web", url);
+                    results = res;
+                } else {
+                    debug!("Retrieving {} [POST] data from cache", url);
+                    results = contents;
+                }
+            }
+            Err(e) => {
+                format!("failed to get current exe path: {}", e);
+            }
+        };
+        Ok(results)
+
+    }
+
     pub async fn js_post(
         url: &String,
         form_selector: &str,
@@ -240,49 +275,4 @@ pub mod cached_reqwest {
             .unwrap()
     }
 
-    /*
-     *   pub async fn poster(url: &String, params: &HashMap<&str, &str>) -> MythraResult<String> {
-     *       let results = match env::current_exe() {
-     *           Ok(exe_path) => {
-     *               // hash url
-     *               let mut val_map = String::from("");
-     *               for (key, val) in params {
-     *                   val_map = val_map + &(format!("{}={}", key, val))[..]
-     *               }
-     *               let concat_url = url.to_owned() + &val_map[..];
-     *               // if file is empty then cache does not exist
-     *               // then retrieve directly using reqwest
-     *               let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
-     *               if (contents.as_str()).eq("") {
-     *                   let client = reqwest::Client::new();
-     *                   let res = client
-     *                       .post(url)
-     *                       .form(params)
-     *                       .send()
-     *                       .await
-     *                       .unwrap()
-     *                       .text()
-     *                       .await
-     *                       .unwrap();
-     *                   file.write_all((res.as_str()).as_bytes())?;
-     *                   debug!("Retrieving {} [POST] data from web", url);
-     *                   res
-     *               } else {
-     *                   debug!("Retrieving {} [POST] data from cache", url);
-     *                   contents
-     *               }
-     *           }
-     *           Err(e) => {
-     *               return Err(Box::new(e));
-     *               // format!("failed to get current exe path: {}", e);
-     *           }
-     *       };
-     *       return Ok(results);
-     *   }
-     *
-     *   pub async fn post(url: &String, params: &HashMap<&str, &str>) -> String {
-     *       let new_url = url.clone();
-     *       poster(&new_url, params).await.ok().unwrap()
-     *   }
-     */
 }
