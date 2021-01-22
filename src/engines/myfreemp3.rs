@@ -36,7 +36,6 @@ impl MyFreeMP3 {
         let elems = v["response"].as_array().unwrap();
         let clone = elems.clone();
         let size = clone.len();
-        println!("size: {:?}", size);
         for (ind, element) in clone.iter().enumerate() {
             let single_music = self.parse_single_music(ind, &element.as_object()).await;
             match single_music {
@@ -66,20 +65,29 @@ impl MyFreeMP3 {
 
     pub async fn parse_single_music(&self,ind :usize, element: &Option<&Map<String, Value>>) -> Option<Music> {
         let title = element.unwrap().get("title").unwrap().as_str().unwrap().to_owned();
+        let artiste = element.unwrap().get("artist").unwrap().as_str().unwrap().to_owned();
+        let data = r#" { "album": {"title": "-"} } "#;
+        let def_album:Value = serde_json::from_str(data).unwrap();
+        let album = element.unwrap().get("album").unwrap_or(
+            &def_album["album"]
+            ).as_object();
+        let collection = album.unwrap().get("title").unwrap().as_str().unwrap().to_owned();
         let duration_i64 = element.unwrap().get("duration").unwrap().as_i64().unwrap();
         let duration = (format!("{}:{}", duration_i64/60, duration_i64%60)).into();
         let download_link = element.unwrap().get("url").unwrap().as_str().unwrap().to_owned();
         debug!("Retrieving song with title -> {}", title);
+        debug!("Artiste -> {}", artiste);
         debug!("Download url -> {}", download_link);
         debug!("Duration -> {}", duration);
+        debug!("Collection -> {:?}", collection);
 
         Some(Music {
             index: ind + 1,
-            artiste: None,
+            artiste: Some(artiste),
             title,
             download_link,
             picture_link: None,
-            collection: None,
+            collection: Some(collection),
             size: None,
             duration: Some(duration),
             source: String::from(CONFIG.name).to_lowercase(),
