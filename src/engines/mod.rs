@@ -32,6 +32,6 @@ pub async fn search_all(engine: &str, query: &str) -> MythraResult<Vec<Music>> {
 
 pub async fn cli(engine: &str, query: &str) {
     let title: &str = &(format!("Searching {} for {}", engine, query))[..];
-    let results = search_all(engine, query).await;
-    //render_select_music(results, title);
+    let results = search_all(engine, query).await.unwrap();
+    render_select_music(results, title);
 }
