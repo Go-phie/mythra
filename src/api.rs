@@ -1,4 +1,3 @@
-use crate::engines::freemp3cloud;
 use crate::engines::mp3s;
 use crate::engines::myfreemp3;
 use crate::types::MusicRequest;
@@ -17,11 +16,6 @@ async fn search(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
     let engine = info.engine.clone();
     let engine_match = engine.as_str();
     match engine_match {
-        "freemp3cloud" => {
-            let e = freemp3cloud::FreeMP3Cloud {};
-            let res = e.search(query).await.ok();
-            HttpResponse::Ok().json(res.unwrap())
-        }
         "mp3s" => {
             let e = mp3s::MP3S {};
             let res = e.search(query).await.ok();
