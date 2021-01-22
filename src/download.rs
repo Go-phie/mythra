@@ -1,5 +1,8 @@
 use cursive::utils::Counter;
 use reqwest::Url;
+use log::debug;
+use ureq::{Agent, AgentBuilder};
+use ureq::Error;
 
 use std::fs;
 use std::io::{self, copy, Read};
@@ -50,20 +53,28 @@ impl<R: Read> Read for DownloadProgress<R> {
 
 pub fn download_size(url: &str) -> Result<u64, String> {
     let url = Url::parse(url).unwrap();
-    let resp = ureq::head(url.as_str()).call();
-    let total_size = {
-        if resp.ok() {
-            resp.header("Content-Length")
+    let agent: Agent = AgentBuilder::new()
+        .timeout(std::time::Duration::from_secs(3))
+        .build();
+    let resp = agent.get(url.as_str());
+    match resp.call() {
+        Ok(res) => {
+            Ok(res.header("Content-Length")
                 .unwrap()
                 .parse::<u64>()
                 .unwrap()
-        } else {
+                )
+        },
+        Err(Error::Status(code, _)) => {
             return Err(
-                format!("Couldn't download URL: {}. Error: {:?}", url, resp.status(),).into(),
-            );
+                format!("Couldn't download URL: {}. Error: {:?}", url, code).into(),
+            )
         }
-    };
-    Ok(total_size)
+        Err(_) => {
+            return Err("tranport error".into())
+        }
+
+    }
 }
 
 pub fn download_from_url(counter: Counter, url: String) {
@@ -79,19 +90,19 @@ pub fn download_from_url(counter: Counter, url: String) {
         .unwrap_or("tmp.bin".to_owned());
 
     let file = Path::new(&segment);
-
+    
+    debug!("{:?}", file);
     // if file already exists
     if file.exists() {
         let size = file.metadata().unwrap().len() - 1;
         request = request
-            .set("Content-Length", &(format!("bytes={}-", size))[..])
-            .build();
+            .set("Content-Length", &(format!("bytes={}-", size))[..]);
         &counter.set(size as usize);
     }
 
     let mut source = DownloadProgress {
         progress_bar: counter,
-        inner: request.call().into_reader(),
+        inner: request.call().unwrap().into_reader(),
     };
     let mut dest = fs::OpenOptions::new()
         .create(true)
