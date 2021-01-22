@@ -1,10 +1,8 @@
 use cursive::utils::Counter;
 use reqwest::Url;
 use log::debug;
-use std::thread;
 use ureq::{Agent, AgentBuilder};
 use ureq::Error;
-use std::time::Duration;
 
 use std::fs;
 use std::io::{self, copy, Read};

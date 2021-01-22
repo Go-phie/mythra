@@ -18,9 +18,8 @@ pub async fn search_all(engine: &str, query: &str) -> MythraResult<Vec<Music>> {
             e.search(query).await
         }
         _ => {
-            let empty: Vec<Music> = vec![];
             error!("Engine is unsupported");
-            Ok(empty)
+            Err(Box::from("Exiting code"))
         }
     }
 }
