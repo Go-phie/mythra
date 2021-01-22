@@ -1,4 +1,3 @@
-pub mod freemp3cloud;
 pub mod mp3s;
 pub mod myfreemp3;
 
@@ -10,10 +9,6 @@ use log::error;
 pub async fn search_all(engine: &str, query: &str) -> MythraResult<Vec<Music>> {
     let query = String::from(query);
     match engine {
-        "freemp3cloud" => {
-            let e = freemp3cloud::FreeMP3Cloud {};
-            e.search(query).await
-        }
         "mp3s" => {
             let e = mp3s::MP3S {};
             e.search(query).await
