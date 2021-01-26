@@ -57,6 +57,7 @@ impl MyFreeMP3 {
         //println!("Data response: {:?}", new_data);
         let re = Regex::new(r"^(?P<last>[(])(?P<content>.*)(?P<first>[)][;]$)").unwrap();
         let result = re.replace(new_data.as_str(), "$content");
+        debug!("{:?}", result);
         //println!("Data response: {:?}", result);
         let d: Value = serde_json::from_str(result.into_owned().as_str()).unwrap();
         // Do things just like with any other Rust data structure.
