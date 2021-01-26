@@ -29,7 +29,7 @@ impl MyFreeMP3 {
         let res = cached_reqwest::post(
             &full_url,
             &form_data
-            ).await.ok().unwrap();
+            ).await.unwrap();
         let v: Value = self.format_response(&res).ok().unwrap().clone();
         //println!("Retrieving song with data -> {:?}", v);
         let mut vec: Vec<Music> = Vec::new();
