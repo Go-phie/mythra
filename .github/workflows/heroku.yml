@@ -2,8 +2,7 @@ name: Deploy to Heroku
 
 on:
   push:
-    tags: 
-      - 'v*'
+    branches: [ master ]
 
 jobs:
   build:
