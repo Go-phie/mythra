@@ -1,13 +1,16 @@
-use crate::types::{Engine, Music, MythraResult};
+use mockall::*;
+use async_trait::async_trait;
+use crate::types::{Engine, Music, MythraResult, EngineTraits};
 use crate::utils::cached_reqwest;
-use crate::utils::extract_from_el;
+use crate::utils::get_element_attribute;
 
 use indicatif::ProgressBar;
 use log::debug;
-use scraper::{ElementRef, Html, Selector};
+use scraper::{Html, Selector};
 
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct MP3S;
 pub static CONFIG: Engine = Engine {
     name: "MP3S",
@@ -15,38 +18,48 @@ pub static CONFIG: Engine = Engine {
     search_url: "https://mp3s.cloud/",
 };
 
-impl MP3S {
-    pub async fn search(&self, _query: String) -> MythraResult<Vec<Music>> {
+#[async_trait]
+impl EngineTraits for MP3S {
+    async fn search(&self, _query: String) -> MythraResult<Vec<Music>> {
         let _query: &str = &_query[..];
         let form_params: HashMap<&str, &str> = [("searchSong", _query)].iter().cloned().collect();
         let bar = ProgressBar::new(100);
         let full_url: String = CONFIG.search_url.to_owned();
         let res = cached_reqwest::js_post(&full_url, ".el-input", &form_params).await;
-        let document = Html::parse_document(res.as_str());
         let selector = Selector::parse(".play-item").unwrap();
         let mut vec: Vec<Music> = Vec::new();
-        let elems = document.select(&selector);
-        let size = elems.count();
-        for (ind, element) in document.select(&selector).enumerate() {
-            let single_music = self.parse_single_music(ind, element).await;
+        let size = Html::parse_document(res.as_str())
+                .select(&selector).count();
+        let other_elems: Vec<String> = Html::parse_document(res.as_str())
+            .select(&selector)
+            .by_ref().map(|x| x.html()).collect();
+
+        for el in 0..size {
+            let element = &other_elems[el];
+            let single_music = self.parse_single_music(el, element.to_string()).await;
             match single_music {
                 Some(music) => vec.push(music),
                 _ => (),
             }
-            // increment progress bar
+//             increment progress bar
             let inc: u64 = (100 / size) as u64;
             bar.inc(inc);
-        }
+        };
         bar.finish();
 
         Ok(vec)
     }
 
-    pub async fn parse_single_music(&self, ind: usize, element: ElementRef<'_>) -> Option<Music> {
-        let title = extract_from_el(&element, ".s-title", "text");
-        let artiste = extract_from_el(&element, ".s-artist", "text");
-        let duration = extract_from_el(&element, ".s-time", "text");
-        let download_link = extract_from_el(&element, ".play-ctrl", "data-src");
+
+}
+
+#[automock]
+impl MP3S {
+    pub async fn parse_single_music(&self, ind: usize, element: String) -> Option<Music> {
+        let title = get_element_attribute(&element, ".s-title", "text");
+        let artiste = get_element_attribute(&element, ".s-artiste", "text");
+        let duration = get_element_attribute(&element, ".s-time", "text");
+        let download_link = get_element_attribute(&element, ".s-time", "data-src");
         debug!("Retrieving song with title -> {}", title);
 
         Some(Music {
