@@ -1,5 +1,6 @@
+use async_trait::async_trait;
 use serde_json::Map;
-use crate::types::{Engine, Music, MythraResult};
+use crate::types::{Engine, EngineTraits, Music, MythraResult};
 use crate::utils::cached_reqwest;
 
 use indicatif::ProgressBar;
@@ -15,9 +16,9 @@ pub static CONFIG: Engine = Engine {
     search_url: "https://my-free-mp3.vip/api/search.php",
 };
 
-
-impl MyFreeMP3 {
-    pub async fn search(&self, _query: String) -> MythraResult<Vec<Music>> {
+#[async_trait]
+impl EngineTraits for MyFreeMP3 {
+    async fn search(&self, _query: String) -> MythraResult<Vec<Music>> {
         let mut _query= String::from(&_query[..]);
         let bar = ProgressBar::new(100);
         let full_url: String = CONFIG.search_url.to_owned();
@@ -51,6 +52,9 @@ impl MyFreeMP3 {
         Ok(vec)
     }
 
+}
+
+impl MyFreeMP3 {
     pub fn format_response(&self, data: &String) -> Result<Value> {
         let new_data = data.as_str();
         let new_data = &new_data.replace("\"apple\",", "");

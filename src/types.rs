@@ -1,9 +1,15 @@
-use scraper::ElementRef;
+use mockall::*;
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 
 // Result type.
 pub type MythraResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+#[derive(Debug)]
+pub enum MythraError {
+    UnsupportedEngine
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Music {
@@ -34,9 +40,10 @@ pub struct Engine {
     pub search_url: &'static str,
 }
 
+#[automock]
+#[async_trait]
 pub trait EngineTraits {
-    fn search(&self, query: String) -> MythraResult<Vec<Music>>;
-    fn parse_single_music(&self, ind: usize, el: ElementRef) -> MythraResult<Music>;
+    async fn search(&self, query: String) -> MythraResult<Vec<Music>>;
 }
 
 // Music request parser for API
@@ -44,4 +51,12 @@ pub trait EngineTraits {
 pub struct MusicRequest {
     pub query: String,
     pub engine: String,
+}
+// and mock!
+mock! {
+    pub Mock {}
+    #[async_trait]
+    trait EngineTraits {
+        async fn search(&self, query: String) -> MythraResult<Vec<Music>>;
+    }
 }
