@@ -112,3 +112,16 @@ pub fn download_from_url(counter: Counter, url: String) {
 
     copy(&mut source, &mut dest).unwrap();
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decode_uri(){
+        assert_eq!(
+            decode_uri("%26%29%26WEasfas%20asdf"), 
+            String::from("&)&WEasfas asdf")
+            )
+    }
+}

@@ -9,8 +9,8 @@ use cursive::Cursive;
 use env_logger::Builder;
 use fantoccini;
 use log::{debug, info};
-use scraper::{ElementRef, Selector};
 
+use scraper::{Html, Selector};
 use std::collections::{hash_map::DefaultHasher, HashMap};
 use std::env;
 use std::fs;
@@ -20,24 +20,23 @@ use std::path::Path;
 
 pub static CACHE_NAME: &str = ".mythra-cache";
 
-// Reduces the stress of repetitive extraction of elements
-// as the raw scraper library is too verbose
-pub fn extract_from_el(element: &ElementRef, selector: &str, attr: &str) -> String {
-    let selector = Selector::parse(selector).unwrap();
-    let tag = element.select(&selector).next().unwrap();
-    match attr {
+pub fn get_element_attribute(element: &String, selector: &str,  attribute: &str) -> String {
+    let document = Html::parse_document(element.as_str());
+    let  selector = Selector::parse(selector).unwrap();
+    match attribute {
         "text" => {
-            return tag.text().collect::<String>();
+            document.select(&selector)
+            .next().unwrap().text().collect::<String>()
         }
-        others => {
-            let val = String::from(tag.value().attr(others).unwrap());
-            if others.eq("href") {
-                debug!("Retrieved link {}", val)
-            };
-            return val;
+        attr => {
+            document.select(&selector)
+            .next().unwrap().value().attr(attr).unwrap().to_owned()
+
         }
+
     }
 }
+
 
 // Removes cache directory
 pub fn clear_cache() {
