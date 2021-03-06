@@ -7,7 +7,7 @@
 
 | Build Type     | Status                                                                                                                                                                       |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Web API        | [![Deploy status](https://github.com/deven96/mythra/workflows/Deploy%20to%20Heroku/badge.svg)](https://github.com/deven96/mythra/actions/)                                   |
+| Web API        | [![Deploy status](https://github.com/deven96/mythra/workflows/Deploy%20to%20GCP/badge.svg)](https://github.com/deven96/mythra/actions/)                                   |
 | Build and Test | [![Test status](https://github.com/deven96/mythra/workflows/Build%20and%20Test/badge.svg)](https://github.com/deven96/mythra/actions/)                                       |
 | Documentation  | [![Docs status](https://github.com/deven96/mythra/workflows/Deploy%20docs%20to%20Stoplight/badge.svg)](https://bisoncorps.stoplight.io/docs/mythra/reference/Mythra.v1.yaml) |
 | Releases       | [![Release status](https://github.com/deven96/mythra/workflows/Release%20to%20GitHub/badge.svg)](https://github.com/deven96/mythra/releases)                                 |

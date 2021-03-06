@@ -1,0 +1,26 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.OPENSSL_KEY }}
+      - name: Redeploy Changes
+        run: |
+          ssh gcp@${{secrets.GCP_HOST}}
+          cd /home/gcp/mythra
+          git pull -f
+          # kill previous running ports
+          lsof -ti tcp:${{secrets.MYTHRA_PORT}} | xargs kill -9
+          lsof -ti tcp:${{secrets.CHROMEDRIVER_PORT}} | xargs kill -9
+          chromedriver --port=${{secrets.CHROMEDRIVER_PORT}} --log-level=DEBUG &
+          /root/.cargo/bin/cargo build && ./target/debug/mythra api --port ${{secrets.MYTHRA_PORT}} --verbose debug &
+        shell: bash
+
