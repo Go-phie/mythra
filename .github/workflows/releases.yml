@@ -9,13 +9,13 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-18.04, macos-latest]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v2
       - run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - run: |
-              if [ "$CURRENT_OS" == "ubuntu-latest" ]; then
+              if [ "$CURRENT_OS" == "ubuntu-18.04" ]; then
                 sudo apt-get install libncursesw5-dev
               elif [ "$CURRENT_OS" == "macos-latest" ]; then
                 brew install ncurses
