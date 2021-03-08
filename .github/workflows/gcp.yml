@@ -1,12 +1,12 @@
 name: Deploy to GCP
 
 on:
-  push:
-    branches: [ master ]
+  release:
+    type: [ published ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: webfactory/ssh-agent@v0.5.0
@@ -17,10 +17,13 @@ jobs:
           ssh gcp@${{secrets.GCP_HOST}}
           cd /home/gcp/mythra
           git pull -f
+          tag=`git tag | tail -n 1`
+          curl https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-latest-$tag > mythra
+          chmod u+x ./mythra
           # kill previous running ports
-          lsof -ti tcp:${{secrets.MYTHRA_PORT}} | xargs kill -9
-          lsof -ti tcp:${{secrets.CHROMEDRIVER_PORT}} | xargs kill -9
+          sudo lsof -ti tcp:${{secrets.MYTHRA_PORT}} | sudo xargs kill -9
+          sudo lsof -ti tcp:${{secrets.CHROMEDRIVER_PORT}} |sudo  xargs kill -9
           chromedriver --port=${{secrets.CHROMEDRIVER_PORT}} --log-level=DEBUG &
-          /root/.cargo/bin/cargo build && ./target/debug/mythra api --port ${{secrets.MYTHRA_PORT}} --verbose debug &
+          ./mythra api --port ${{secrets.MYTHRA_PORT}} --verbose debug &
         shell: bash
 
