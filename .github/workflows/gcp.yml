@@ -3,6 +3,11 @@ name: Deploy to GCP
 on:
   release:
     types: [ released, edited ]
+  workflow_run:
+    workflows: ["Release to GitHub"]
+    branches: [master]
+    types:
+      - completed
 
 jobs:
   build:
@@ -19,10 +24,11 @@ jobs:
             git fetch
             tag=`git tag | tail -n 1`
             curl https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-18.04-$tag > mythra
-            chmod u+x ./mythra
+            sudo chmod u+x ./mythra
             # kill previous running ports
-            sudo lsof -ti tcp:${{secrets.MYTHRA_PORT}} | sudo xargs kill -9
-            sudo lsof -ti tcp:${{secrets.CHROMEDRIVER_PORT}} |sudo  xargs kill -9
+            sudo lsof -ti tcp:${{secrets.MYTHRA_PORT}} | sudo xargs kill -9 > /dev/null/ 2&>1
+            sudo lsof -ti tcp:${{secrets.CHROMEDRIVER_PORT}} |sudo  xargs kill -9 > /dev/null/ 2&>1
             chromedriver --port=${{secrets.CHROMEDRIVER_PORT}} --log-level=DEBUG &
             ./mythra api --port ${{secrets.MYTHRA_PORT}} --verbose debug &
 
+            exit
