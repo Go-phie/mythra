@@ -26,9 +26,5 @@ jobs:
             curl https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-18.04-$tag > mythra
             sudo chmod u+x ./mythra
             # kill previous running ports
-            sudo lsof -ti tcp:${{secrets.MYTHRA_PORT}} | sudo xargs kill -9 > /dev/null/ 2&>1
-            sudo lsof -ti tcp:${{secrets.CHROMEDRIVER_PORT}} |sudo  xargs kill -9 > /dev/null/ 2&>1
-            chromedriver --port=${{secrets.CHROMEDRIVER_PORT}} --log-level=DEBUG &
-            ./mythra api --port ${{secrets.MYTHRA_PORT}} --verbose debug &
-
+            sudo systemctl restart mythra
             exit
