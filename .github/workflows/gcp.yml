@@ -1,11 +1,8 @@
 name: Deploy to GCP
 
 on:
-  release:
-    types: [ released, edited ]
   workflow_run:
     workflows: ["Release to GitHub"]
-    branches: [master]
     types:
       - completed
 
@@ -20,10 +17,9 @@ jobs:
           host: ${{ secrets.GCP_HOST }}
           username: ${{secrets.USERNAME}}
           script: |
-            cd /home/${{secrets.USERNAME}}/mythra
-            git fetch
-            tag=`git tag | tail -n 1`
-            curl https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-18.04-$tag > mythra
+            cd /opt
+            tag=`curl "https://api.github.com/repos/deven96/mythra/releases/latest" | jq '.tag_name'`
+            sudo curl https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-18.04-$tag > mythra
             sudo chmod u+x ./mythra
             # kill previous running ports
             sudo systemctl restart mythra
