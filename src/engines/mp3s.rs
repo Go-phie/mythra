@@ -57,15 +57,9 @@ impl EngineTraits for MP3S {
 impl MP3S {
     pub async fn parse_single_music(&self, ind: usize, element: String) -> Option<Music> {
         let title = get_element_attribute(&element, ".s-title", "text");
-<<<<<<< HEAD
         let artiste = get_element_attribute(&element, ".s-artist", "text");
         let duration = get_element_attribute(&element, ".s-time", "text");
         let download_link = get_element_attribute(&element, "[target='_blank'", "href");
-=======
-        let artiste = get_element_attribute(&element, ".s-artiste", "text");
-        let duration = get_element_attribute(&element, ".s-time", "text");
-        let download_link = get_element_attribute(&element, ".s-time", "data-src");
->>>>>>> 53e0e3c1ae7b9f2e9e6f1aa4a039ead522a28870
         debug!("Retrieving song with title -> {}", title);
 
         Some(Music {
