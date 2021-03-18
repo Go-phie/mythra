@@ -169,8 +169,16 @@ pub mod cached_reqwest {
                 let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
+                let mut caps = serde_json::map::Map::new();
+                let opts = serde_json::json!({ "args": [
+                    "--headless", 
+                    "--disable-gpu", 
+                    "--no-sandbox", 
+                    "--disable-dev-shm-usage",
+                    ] });
+                caps.insert("goog:chromeOptions".to_string(), opts.clone());
                 if (contents.as_str()).eq("") {
-                    let mut c = fantoccini::Client::new("http://localhost:4444")
+                    let mut c = fantoccini::Client::with_capabilities("http://localhost:4444", caps)
                         .await
                         .expect("failed to connect to WebDriver");
                     c.goto(url).await.unwrap();
