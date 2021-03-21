@@ -19,8 +19,8 @@ jobs:
           script: |
             cd /opt
             tag=`curl "https://api.github.com/repos/deven96/mythra/releases/latest" | jq '.tag_name'`
-            sudo curl https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-18.04-$tag > mythra
-            sudo chmod u+x ./mythra
+            curl https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-18.04-$tag > mythra
+            sudo chmod 755 ./mythra
             # kill previous running ports
             sudo systemctl restart mythra
             exit
