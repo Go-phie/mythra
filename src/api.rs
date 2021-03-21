@@ -4,7 +4,7 @@ use crate::types::{
 };
 
 use actix_web::{http::StatusCode, web, App, HttpResponse, HttpServer};
-//use actix_cors::Cors;
+use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use log::{debug, error};
 
@@ -32,7 +32,11 @@ async fn search(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
 pub async fn api(port: &str) -> std::io::Result<()> {
     let address: &str = &(format!("0.0.0.0:{}", port))[..];
     HttpServer::new(|| {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allowed_methods(vec!["GET", "POST"]);
         App::new()
+            .wrap(cors)
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(web::resource("/search").route(web::get().to(search)))
