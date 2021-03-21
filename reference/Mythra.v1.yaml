@@ -13,8 +13,8 @@ info:
     name: GNU Affero Public License
   description: In my bid to learn Rust I turned to an age old friend... web scraping. I built this API to be able to search for songs and return valid details for the songs
 servers:
-  - url: 'https://gophie-mythra.herokuapp.com'
-    description: Heroku Mythra
+  - url: 'https://mythra.gophie.cam'
+    description: Deploy Mythra
 paths:
   /search:
     get:
