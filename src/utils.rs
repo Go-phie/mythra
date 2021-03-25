@@ -125,6 +125,8 @@ pub fn configure_log(level: &str) {
 pub mod cached_reqwest {
     #[allow(dead_code)]
     use super::*;
+    use std::io::SeekFrom;
+    use std::io::prelude::*;
     
 
     pub fn create_or_retrieve(
@@ -150,7 +152,6 @@ pub mod cached_reqwest {
         // read file contents to String
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
-        //                Ok((file, contents))
         (file, contents)
     }
 
@@ -256,6 +257,8 @@ pub mod cached_reqwest {
                         .post(url)
                         .form(&params).send()
                         .await?.text().await?;
+                    // overwrite current data
+                    file.seek(SeekFrom::Start(0))?;
                     file.write_all((res.as_str()).as_bytes())?;
                     debug!("Retrieving {} [POST] data from web", url);
                     results = res;
