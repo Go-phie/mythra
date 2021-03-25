@@ -251,7 +251,7 @@ pub mod cached_reqwest {
                 // then retrieve directly using reqwest
                 if (contents.as_str()).eq("") || 
                     (contents.as_str()).eq("error code: 1020") ||
-                    (contents.as_str()).eq("{\"response\":null}"){
+                    (contents.as_str()).eq("({\"response\":null});"){
                     let res = reqwest::Client::new()
                         .post(url)
                         .form(&params).send()
