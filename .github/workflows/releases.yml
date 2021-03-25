@@ -20,6 +20,7 @@ jobs:
               elif [ "$CURRENT_OS" == "macos-latest" ]; then
                 brew install ncurses
               fi
+              sed -i 's/version:.*/version: "${{env.RELEASE_VERSION}}"/g' src/cli.yaml
         env:
           CURRENT_OS: ${{matrix.os}}
       - run:  cargo build --release --locked && chmod +x target/release/mythra
