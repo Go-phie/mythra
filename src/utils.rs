@@ -249,7 +249,9 @@ pub mod cached_reqwest {
                 let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
-                if (contents.as_str()).eq("") || (contents.as_str()).eq("error code: 1020"){
+                if (contents.as_str()).eq("") || 
+                    (contents.as_str()).eq("error code: 1020") ||
+                    (contents.as_str()).eq("{\"response\":null}"){
                     let res = reqwest::Client::new()
                         .post(url)
                         .form(&params).send()
