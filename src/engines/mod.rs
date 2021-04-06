@@ -1,5 +1,6 @@
 pub mod mp3s;
 pub mod myfreemp3;
+pub mod mp3direct;
 use crate::types::{
     EngineTraits,
     MythraError,
@@ -15,6 +16,9 @@ pub fn get_engine(engine: &str) -> Result<Box<dyn EngineTraits>, MythraError>{
         },
         "myfreemp3" => {
             Ok(Box::new(myfreemp3::MyFreeMP3{}))
+        }
+        "mp3direct" => {
+            Ok(Box::new(mp3direct::MP3Direct{}))
         }
         engine_match => {
             error!("Engine {} is unsupported", engine_match);

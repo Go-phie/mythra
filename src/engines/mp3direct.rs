@@ -10,22 +10,23 @@ use log::debug;
 use scraper::{Html, Selector};
 use regex::Regex;
 
-pub struct MyFreeMP3;
+pub struct MP3Direct;
 pub static CONFIG: Engine = Engine {
-    name: "myfreemp3",
-    base_url: "http://mp3clan.top/",
-    search_url: "http://mp3clan.top/mp3/",
+    name: "mp3direct",
+    base_url: "https://mp3direct.live",
+    search_url: "https://mp3direct.live/#!s=",
 };
 
 #[async_trait]
-impl EngineTraits for MyFreeMP3 {
+impl EngineTraits for MP3Direct {
     async fn search(&self, _query: String) -> MythraResult<Vec<Music>> {
-        let mut _append = str::replace(&_query[..], " ", "_");
-        _append = format!("{}{}.html", CONFIG.search_url,_append);
+        let mut _append = str::replace(&_query[..], " ", "+");
+        _append = format!("{}{}", CONFIG.search_url,_append);
         let mut _query= String::from(&_append[..]);
 
-        let res = cached_reqwest::get(&_query, false).await;
-        let selector = Selector::parse("#mp3list").unwrap();
+        let res = cached_reqwest::get(&_query, true).await;
+        debug!("{:?}", res);
+        let selector = Selector::parse(".ui-li").unwrap();
         let size = Html::parse_document(res.as_str())
                 .select(&selector).count();
         let bar = ProgressBar::new(100);
@@ -50,36 +51,26 @@ impl EngineTraits for MyFreeMP3 {
 
 }
 
-impl MyFreeMP3 {
+impl MP3Direct {
     pub async fn parse_single_music(&self, ind: usize, element: String) -> Option<Music> {
-        let title_full = get_element_attribute(&element, ".unselectable", "text");
-        let bitrate = get_element_attribute(&element, ".mp3list-bitrate", "text");
-        let title_rg = Regex::new(r"(?P<artiste>.*) - (?P<title>.*)")
+        let title = get_element_attribute(&element, ".ui-li-heading", "text");
+        let artiste = get_element_attribute(&element, ".ui-li-desc", "text");
+        let picture_link = get_element_attribute(&element, "img", "src");
+        let size_full = get_element_attribute(&element, "p.source", "text");
+        let size_rg = Regex::new(r"(?P<size>.*) MB")
             .unwrap();
-        let bitrate_rg = Regex::new(r"Check (?P<duration>.*) min")
-            .unwrap();
-        let title = String::from(title_rg.captures(&title_full[..])
+        let size = String::from(size_rg.captures(&size_full[..])
             .unwrap()
-            .name("title")
+            .name("size")
             .unwrap()
             .as_str()
             );
-        let artiste = String::from(title_rg.captures(&title_full[..])
-            .unwrap()
-            .name("artiste")
-            .unwrap()
-            .as_str()
-            );
-        let duration = String::from(bitrate_rg.captures(&bitrate[..])
-            .unwrap()
-            .name("duration")
-            .unwrap()
-            .as_str()
-            );
-        let selector = Selector::parse(".mp3list-download").unwrap();
-        let size = Html::parse_fragment(element.as_str())
-                .select(&selector).next().unwrap().inner_html();
-        let download_link = get_element_attribute(&size, "a", "href");
+        let temp_dl = format!("{}{}", CONFIG.base_url, get_element_attribute(&element, "a.ui-link-inherit", "href"));
+        let res = cached_reqwest::get(
+            &String::from(temp_dl),
+            true
+            ).await;
+        let download_link = get_element_attribute(&res, "#download-btn", "href");
         debug!("Retrieving song with title -> {}", title);
 
         Some(Music {
@@ -87,10 +78,10 @@ impl MyFreeMP3 {
             artiste: Some(artiste),
             title,
             download_link,
-            picture_link: None,
+            picture_link: Some(picture_link),
             collection: None,
-            size: None,
-            duration: Some(duration),
+            size: Some(size),
+            duration: None,
             source: String::from(CONFIG.name).to_lowercase(),
         })
     }
