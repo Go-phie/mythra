@@ -40,12 +40,11 @@ impl EngineTraits for MyFreeMP3 {
                 Some(music) => vec.push(music),
                 _ => (),
             }
-            // increment progress bar
+            //             increment progress bar
             let inc: u64 = (100 / size) as u64;
             bar.inc(inc);
         }
         bar.finish();
-
         Ok(vec)
     }
 }
@@ -107,10 +106,6 @@ impl MyFreeMP3 {
             .unwrap()
             .to_owned();
         debug!("Retrieving song with title -> {}", title);
-        debug!("Artiste -> {}", artiste);
-        debug!("Download url -> {}", download_link);
-        debug!("Duration -> {}", duration);
-        debug!("Collection -> {:?}", collection);
 
         Some(Music {
             index: ind + 1,
@@ -118,7 +113,7 @@ impl MyFreeMP3 {
             title,
             download_link,
             picture_link: None,
-            collection: Some(collection),
+            collection: None,
             size: None,
             duration: Some(duration),
             source: String::from(CONFIG.name).to_lowercase(),

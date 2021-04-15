@@ -1,0 +1,27 @@
+name: Deploy to GCP
+
+on:
+  workflow_run:
+    workflows: ["Release to GitHub"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.OPENSSL_KEY }}
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{secrets.USERNAME}}
+          script: |
+            cd /opt
+            tag=`curl "https://api.github.com/repos/deven96/mythra/releases/latest" | jq '.tag_name' | tr -d \"`
+            sudo curl -L https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-18.04-$tag > mythra-replace
+            sudo chmod 755 ./mythra-replace
+            sudo cp -f mythra-replace mythra
+            # kill previous running ports
+            sudo systemctl restart mythra
+            exit
