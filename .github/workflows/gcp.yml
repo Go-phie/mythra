@@ -18,7 +18,7 @@ jobs:
           username: ${{secrets.USERNAME}}
           script: |
             cd /opt
-            tag=`curl "https://api.github.com/repos/deven96/mythra/releases/latest" | jq '.tag_name' | tr -d \"`
+            tag=`curl -L "https://api.github.com/repos/deven96/mythra/releases/latest" | jq '.tag_name' | tr -d \"`
             sudo curl -L https://github.com/deven96/mythra/releases/download/$tag/mythra-ubuntu-18.04-$tag > mythra-replace
             sudo chmod 755 ./mythra-replace
             sudo cp -f mythra-replace mythra
