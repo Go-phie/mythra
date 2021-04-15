@@ -9,7 +9,7 @@ use crate::types::{
 use crate::utils::render_select_music;
 use log::error;
 
-pub fn get_engine(engine: &str) -> Result<Box<dyn EngineTraits>, MythraError>{
+pub fn get_engine(engine: &str) -> Result<Box<dyn EngineTraits>, MythraError> {
     match engine {
         "mp3s" => {
             Ok(Box::new(mp3s::MP3S{}))
@@ -32,11 +32,9 @@ pub async fn cli(engine_name: &str, query: &str) {
     let engine = get_engine(engine_name);
     match engine {
         Ok(actual) => {
-            let results = actual.search(
-                String::from(query)
-                ).await.unwrap();
+            let results = actual.search(String::from(query)).await.unwrap();
             render_select_music(results, title);
-        },
+        }
         Err(_) => {
             error!("Error {} is unsupported", engine_name);
         }
@@ -46,12 +44,15 @@ pub async fn cli(engine_name: &str, query: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
     #[actix_rt::test]
     async fn test_cli_with_fake_engine_returns_not_found() {
         let mut mock = MockEngineTraits::new();
         mock.expect_search().times(0);
         cli("fake", "query").await;
     }
-
+    #[actix_rt::test]
+    async fn test_cli_with_myfreemp3_engine() {
+        let engine: &str = "myfreemp3";
+        get_engine(engine).unwrap();
+    }
 }

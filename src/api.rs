@@ -1,7 +1,5 @@
 use crate::engines::get_engine;
-use crate::types::{
-    MusicRequest
-};
+use crate::types::MusicRequest;
 
 use actix_web::{http::StatusCode, web, App, HttpResponse, HttpServer};
 use actix_cors::Cors;
@@ -21,7 +19,7 @@ async fn search(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
         Ok(actual) => {
             let res = actual.search(query).await.ok();
             HttpResponse::Ok().json(res.unwrap())
-        },
+        }
         Err(_) => {
             error!("Error {} is unsupported", engine_match);
             HttpResponse::new(StatusCode::NOT_FOUND)
@@ -53,7 +51,14 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_api_with_fake_engine_returns_not_found() {
-        let query: web::Query<MusicRequest> = web::Query::from_query("engine=fake&query=real").unwrap();
+        let query: web::Query<MusicRequest> =
+            web::Query::from_query("engine=fake&query=real").unwrap();
         assert_eq!(search(query).await.status(), StatusCode::NOT_FOUND);
+    }
+    #[actix_rt::test]
+    async fn test_api_with_myfreemp3() {
+        let query: web::Query<MusicRequest> =
+            web::Query::from_query("engine=myfreemp3&query=real").unwrap();
+        search(query).await;
     }
 }
