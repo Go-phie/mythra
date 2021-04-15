@@ -284,8 +284,6 @@ pub mod cached_reqwest {
                         .await?
                         .text()
                         .await?;
-                    // overwrite current data
-                    file.seek(SeekFrom::Start(0))?;
                     file.write_all((res.as_str()).as_bytes())?;
                     debug!("Retrieving {} [POST] data from web", url);
                     results = res;
