@@ -128,6 +128,8 @@ pub fn configure_log(level: &str) {
 pub mod cached_reqwest {
     #[allow(dead_code)]
     use super::*;
+    use std::io::prelude::*;
+    use std::io::SeekFrom;
 
     pub fn create_or_retrieve(
         url: String,
@@ -152,7 +154,6 @@ pub mod cached_reqwest {
         // read file contents to String
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
-        //                Ok((file, contents))
         (file, contents)
     }
 
@@ -171,10 +172,19 @@ pub mod cached_reqwest {
                 let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
+                let opts = serde_json::json!({ "args": [
+                    "--headless", 
+                    "--disable-gpu", 
+                    "--no-sandbox", 
+                    "--disable-dev-shm-usage",
+                ] });
+                let mut caps = serde_json::map::Map::new();
+                caps.insert("goog:chromeOptions".to_string(), opts.clone());
                 if (contents.as_str()).eq("") {
-                    let mut c = fantoccini::Client::new("http://localhost:4444")
-                        .await
-                        .expect("failed to connect to WebDriver");
+                    let mut c =
+                        fantoccini::Client::with_capabilities("http://localhost:4444", caps)
+                            .await
+                            .expect("failed to connect to WebDriver");
                     c.goto(url).await.unwrap();
                     let mut form = c
                         .form(fantoccini::Locator::Css(form_selector))
@@ -202,7 +212,7 @@ pub mod cached_reqwest {
         Ok(results)
     }
 
-    pub async fn getter(url: &String) -> MythraResult<String> {
+    pub async fn getter(url: &String, browser: bool) -> MythraResult<String> {
         let mut results = String::new();
         match env::current_exe() {
             Ok(exe_path) => {
@@ -210,7 +220,30 @@ pub mod cached_reqwest {
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
                 if (contents.as_str()).eq("") {
-                    let res = reqwest::get(url).await.unwrap().text().await.unwrap();
+                    let res: String;
+                    if browser {
+                        let opts = serde_json::json!({ "args": [
+//                            "--headless", 
+                            "--disable-gpu", 
+                            "--no-sandbox", 
+                            "--disable-dev-shm-usage",
+                        ] });
+                        let mut caps = serde_json::map::Map::new();
+                        caps.insert("goog:chromeOptions".to_string(), opts.clone());
+                        let mut c =
+                            fantoccini::Client::with_capabilities("http://localhost:4444", caps)
+                                .await
+                                .expect("failed to connect to WebDriver");
+                        c.goto(url).await.unwrap();
+                        c.wait_for_find(fantoccini::Locator::Css("div"))
+                            .await
+                            .unwrap();
+                        res = c.source().await.unwrap();
+                        c.close().await.unwrap();
+                    } else {
+                        res = reqwest::get(url).await.unwrap().text().await.unwrap();
+                    }
+                    file.seek(SeekFrom::Start(0))?;
                     file.write_all((res.as_str()).as_bytes())?;
                     debug!("Retrieving {} [GET] data from web", url);
                     results = res;
@@ -226,9 +259,9 @@ pub mod cached_reqwest {
         Ok(results)
     }
 
-    pub async fn get(url: &String) -> String {
+    pub async fn get(url: &String, browser: bool) -> String {
         let new_url = url.clone();
-        getter(&new_url).await.ok().unwrap()
+        getter(&new_url, browser).await.ok().unwrap()
     }
 
     pub async fn post(url: &String, params: &[(&str, &str)]) -> MythraResult<String> {
@@ -243,7 +276,10 @@ pub mod cached_reqwest {
                 let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
-                if (contents.as_str()).eq("") || (contents.as_str()).eq("error code: 1020") {
+                if (contents.as_str()).eq("")
+                    || (contents.as_str()).eq("error code: 1020")
+                    || (contents.as_str()).eq("({\"response\":null});")
+                {
                     let res = reqwest::Client::new()
                         .post(url)
                         .form(&params)
@@ -251,6 +287,8 @@ pub mod cached_reqwest {
                         .await?
                         .text()
                         .await?;
+                    // overwrite current data
+                    file.seek(SeekFrom::Start(0))?;
                     file.write_all((res.as_str()).as_bytes())?;
                     debug!("Retrieving {} [POST] data from web", url);
                     results = res;

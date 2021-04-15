@@ -1,13 +1,25 @@
 pub mod mp3s;
 pub mod myfreemp3;
-use crate::types::{EngineTraits, MockEngineTraits, MythraError};
+pub mod mp3direct;
+use crate::types::{
+    EngineTraits,
+    MythraError,
+    MockEngineTraits
+};
 use crate::utils::render_select_music;
 use log::error;
 
 pub fn get_engine(engine: &str) -> Result<Box<dyn EngineTraits>, MythraError> {
     match engine {
-        "mp3s" => Ok(Box::new(mp3s::MP3S {})),
-        "myfreemp3" => Ok(Box::new(myfreemp3::MyFreeMP3 {})),
+        "mp3s" => {
+            Ok(Box::new(mp3s::MP3S{}))
+        },
+        "myfreemp3" => {
+            Ok(Box::new(myfreemp3::MyFreeMP3{}))
+        }
+        "mp3direct" => {
+            Ok(Box::new(mp3direct::MP3Direct{}))
+        }
         engine_match => {
             error!("Engine {} is unsupported", engine_match);
             Err(MythraError::UnsupportedEngine)
