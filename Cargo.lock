@@ -1657,7 +1657,7 @@ dependencies = [
 
 [[package]]
 name = "mythra"
-version = "0.1.9"
+version = "2.1.3"
 dependencies = [
  "actix-cors",
  "actix-rt",
