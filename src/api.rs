@@ -1,9 +1,9 @@
 use crate::engines::get_engine;
 use crate::types::MusicRequest;
 
-use actix_web::{http::StatusCode, web, App, HttpResponse, HttpServer};
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
+use actix_web::{http::StatusCode, web, App, HttpResponse, HttpServer};
 use log::{debug, error};
 
 async fn search(web::Query(info): web::Query<MusicRequest>) -> HttpResponse {
@@ -55,10 +55,10 @@ mod tests {
             web::Query::from_query("engine=fake&query=real").unwrap();
         assert_eq!(search(query).await.status(), StatusCode::NOT_FOUND);
     }
-    #[actix_rt::test]
-    async fn test_api_with_myfreemp3() {
-        let query: web::Query<MusicRequest> =
-            web::Query::from_query("engine=myfreemp3&query=real").unwrap();
-        search(query).await;
-    }
+    //#[actix_rt::test]
+    //async fn test_api_with_myfreemp3() {
+    //   let query: web::Query<MusicRequest> =
+    //       web::Query::from_query("engine=myfreemp3&query=real").unwrap();
+    //   search(query).await;
+    //}
 }
