@@ -31,10 +31,11 @@ impl EngineTraits for MyFreeMP3 {
         //println!("Retrieving song with data -> {:?}", v);
         let mut vec: Vec<Music> = Vec::new();
         let elems = v["response"].as_array().unwrap();
-        let clone = elems.clone();
-        let size = clone.len();
-        for (ind, element) in clone.iter().enumerate() {
-            let single_music = self.parse_single_music(ind, &element.as_object()).await;
+        let other_elems = elems.clone();
+        let size = other_elems.len();
+        for el in 0..size {
+            let element = &other_elems[el];
+            let single_music = self.parse_single_music(el, &element.as_object()).await;
             match single_music {
                 Some(music) => vec.push(music),
                 _ => (),
