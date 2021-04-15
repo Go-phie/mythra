@@ -1,85 +1,110 @@
-use async_trait::async_trait;
 use crate::types::{Engine, EngineTraits, Music, MythraResult};
-use crate::utils::{
-    cached_reqwest,
-    get_element_attribute
-};
+use crate::utils::cached_reqwest;
+use async_trait::async_trait;
+use serde_json::Map;
 
 use indicatif::ProgressBar;
 use log::debug;
-use scraper::{Html, Selector};
 use regex::Regex;
+use serde_json::Result;
+use serde_json::Value;
 
 pub struct MyFreeMP3;
 pub static CONFIG: Engine = Engine {
     name: "myfreemp3",
-    base_url: "http://mp3clan.top/",
-    search_url: "http://mp3clan.top/mp3/",
+    base_url: "http://myfreemp3music.com/",
+    search_url: "https://myfreemp3music.com/api/search.php",
 };
 
 #[async_trait]
 impl EngineTraits for MyFreeMP3 {
     async fn search(&self, _query: String) -> MythraResult<Vec<Music>> {
-        let mut _append = str::replace(&_query[..], " ", "_");
-        _append = format!("{}{}.html", CONFIG.search_url,_append);
-        let mut _query= String::from(&_append[..]);
-
-        let res = cached_reqwest::get(&_query, false).await;
-        let selector = Selector::parse("#mp3list").unwrap();
-        let size = Html::parse_document(res.as_str())
-                .select(&selector).count();
+        let mut _query = String::from(&_query[..]);
         let bar = ProgressBar::new(100);
-        let other_elems: Vec<String> = Html::parse_document(res.as_str())
-            .select(&selector)
-            .by_ref().map(|x| x.html()).collect();
+        let full_url: String = CONFIG.search_url.to_owned();
+        let form_data = [("q", _query.as_str())];
+        let res = cached_reqwest::post(&full_url, &form_data)
+            .await
+            .ok()
+            .unwrap();
+        let v: Value = self.format_response(&res).ok().unwrap().clone();
+        //println!("Retrieving song with data -> {:?}", v);
         let mut vec: Vec<Music> = Vec::new();
+        let elems = v["response"].as_array().unwrap();
+        let other_elems = elems.clone();
+        let size = other_elems.len();
         for el in 0..size {
             let element = &other_elems[el];
-            let single_music = self.parse_single_music(el, element.to_string()).await;
+            let single_music = self.parse_single_music(el, &element.as_object()).await;
             match single_music {
                 Some(music) => vec.push(music),
                 _ => (),
             }
-//             increment progress bar
+            //             increment progress bar
             let inc: u64 = (100 / size) as u64;
             bar.inc(inc);
-        };
+        }
         bar.finish();
         Ok(vec)
     }
-
 }
 
 impl MyFreeMP3 {
-    pub async fn parse_single_music(&self, ind: usize, element: String) -> Option<Music> {
-        let title_full = get_element_attribute(&element, ".unselectable", "text");
-        let bitrate = get_element_attribute(&element, ".mp3list-bitrate", "text");
-        let title_rg = Regex::new(r"(?P<artiste>.*) - (?P<title>.*)")
-            .unwrap();
-        let bitrate_rg = Regex::new(r"Check (?P<duration>.*) min")
-            .unwrap();
-        let title = String::from(title_rg.captures(&title_full[..])
+    pub fn format_response(&self, data: &String) -> Result<Value> {
+        let new_data = data.as_str();
+        let new_data = &new_data.replace("\"apple\",", "");
+        //println!("Data response: {:?}", new_data);
+        let re = Regex::new(r"^(?P<last>[(])(?P<content>.*)(?P<first>[)][;]$)").unwrap();
+        let result = re.replace(new_data.as_str(), "$content");
+        debug!("{:?}", result);
+        //println!("Data response: {:?}", result);
+        let d: Value = serde_json::from_str(result.into_owned().as_str()).unwrap();
+        // Do things just like with any other Rust data structure.
+        Ok(d)
+    }
+
+    pub async fn parse_single_music(
+        &self,
+        ind: usize,
+        element: &Option<&Map<String, Value>>,
+    ) -> Option<Music> {
+        let title = element
             .unwrap()
-            .name("title")
+            .get("title")
             .unwrap()
             .as_str()
-            );
-        let artiste = String::from(title_rg.captures(&title_full[..])
             .unwrap()
-            .name("artiste")
+            .to_owned();
+        let artiste = element
             .unwrap()
-            .as_str()
-            );
-        let duration = String::from(bitrate_rg.captures(&bitrate[..])
-            .unwrap()
-            .name("duration")
+            .get("artist")
             .unwrap()
             .as_str()
-            );
-        let selector = Selector::parse(".mp3list-download").unwrap();
-        let size = Html::parse_fragment(element.as_str())
-                .select(&selector).next().unwrap().inner_html();
-        let download_link = get_element_attribute(&size, "a", "href");
+            .unwrap()
+            .to_owned();
+        let data = r#" { "album": {"title": "-"} } "#;
+        let def_album: Value = serde_json::from_str(data).unwrap();
+        let album = element
+            .unwrap()
+            .get("album")
+            .unwrap_or(&def_album["album"])
+            .as_object();
+        let collection = album
+            .unwrap()
+            .get("title")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let duration_i64 = element.unwrap().get("duration").unwrap().as_i64().unwrap();
+        let duration = (format!("{}:{}", duration_i64 / 60, duration_i64 % 60)).into();
+        let download_link = element
+            .unwrap()
+            .get("url")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_owned();
         debug!("Retrieving song with title -> {}", title);
 
         Some(Music {
