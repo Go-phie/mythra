@@ -1,5 +1,6 @@
 use crate::types::{Engine, EngineTraits, Music, MythraResult};
 use crate::utils::cached_reqwest;
+use crate::utils::clear_cache;
 use async_trait::async_trait;
 use serde_json::Map;
 
@@ -8,7 +9,7 @@ use log::debug;
 use regex::Regex;
 use serde_json::Result;
 use serde_json::Value;
-
+use serde_json::Error;
 pub struct MyFreeMP3;
 pub static CONFIG: Engine = Engine {
     name: "myfreemp3",
@@ -30,7 +31,7 @@ impl EngineTraits for MyFreeMP3 {
         let v: Value = self.format_response(&res).ok().unwrap().clone();
         //println!("Retrieving song with data -> {:?}", v);
         let mut vec: Vec<Music> = Vec::new();
-        let elems = v["response"].as_array().unwrap();
+        let elems = v["response"].as_array().unwrap(); 
         let other_elems = elems.clone();
         let size = other_elems.len();
         for el in 0..size {
@@ -58,9 +59,14 @@ impl MyFreeMP3 {
         let result = re.replace(new_data.as_str(), "$content");
         debug!("{:?}", result);
         //println!("Data response: {:?}", result);
-        let d: Value = serde_json::from_str(result.into_owned().as_str()).unwrap();
-        // Do things just like with any other Rust data structure.
-        Ok(d)
+        let d = serde_json::from_str(result.into_owned().as_str());
+        match d {
+            Ok(val) => Ok(val),
+            Err(err) => {
+                clear_cache();
+                Err(err)
+            }
+        }
     }
 
     pub async fn parse_single_music(
