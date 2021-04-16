@@ -227,7 +227,7 @@ pub mod cached_reqwest {
                         ] });
                         let mut caps = serde_json::map::Map::new();
                         caps.insert("goog:chromeOptions".to_string(), opts.clone());
-                        let mut c = fantoccini::Client::with_capabilities("http://localhost:4444", caps)
+                        let mut c = fantoccini::Client::with_capabilities("http://localhost:9515", caps)
                             .await
                             .expect("failed to connect to WebDriver");
                         c.goto(url).await.unwrap();
