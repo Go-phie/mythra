@@ -20,23 +20,26 @@ use std::path::Path;
 
 pub static CACHE_NAME: &str = ".mythra-cache";
 
-pub fn get_element_attribute(element: &String, selector: &str,  attribute: &str) -> String {
+pub fn get_element_attribute(element: &String, selector: &str, attribute: &str) -> String {
     let document = Html::parse_document(element.as_str());
-    let  selector = Selector::parse(selector).unwrap();
+    let selector = Selector::parse(selector).unwrap();
     match attribute {
-        "text" => {
-            document.select(&selector)
-            .next().unwrap().text().collect::<String>()
-        }
-        attr => {
-            document.select(&selector)
-            .next().unwrap().value().attr(attr).unwrap().to_owned()
-
-        }
-
+        "text" => document
+            .select(&selector)
+            .next()
+            .unwrap()
+            .text()
+            .collect::<String>(),
+        attr => document
+            .select(&selector)
+            .next()
+            .unwrap()
+            .value()
+            .attr(attr)
+            .unwrap()
+            .to_owned(),
     }
 }
-
 
 // Removes cache directory
 pub fn clear_cache() {
@@ -125,9 +128,8 @@ pub fn configure_log(level: &str) {
 pub mod cached_reqwest {
     #[allow(dead_code)]
     use super::*;
-    use std::io::SeekFrom;
     use std::io::prelude::*;
-    
+    use std::io::SeekFrom;
 
     pub fn create_or_retrieve(
         url: String,
@@ -170,7 +172,7 @@ pub mod cached_reqwest {
                 let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
                 // if file is empty then cache does not exist
                 // then retrieve directly using reqwest
-                let opts  = serde_json::json!({ "args": [
+                let opts = serde_json::json!({ "args": [
                     "--headless", 
                     "--disable-gpu", 
                     "--no-sandbox", 
@@ -179,9 +181,10 @@ pub mod cached_reqwest {
                 let mut caps = serde_json::map::Map::new();
                 caps.insert("goog:chromeOptions".to_string(), opts.clone());
                 if (contents.as_str()).eq("") {
-                    let mut c = fantoccini::Client::with_capabilities("http://localhost:4444", caps)
-                        .await
-                        .expect("failed to connect to WebDriver");
+                    let mut c =
+                        fantoccini::Client::with_capabilities("http://localhost:4444", caps)
+                            .await
+                            .expect("failed to connect to WebDriver");
                     c.goto(url).await.unwrap();
                     let mut form = c
                         .form(fantoccini::Locator::Css(form_selector))
@@ -219,7 +222,7 @@ pub mod cached_reqwest {
                 if (contents.as_str()).eq("") {
                     let res: String;
                     if browser {
-                        let opts  = serde_json::json!({ "args": [
+                        let opts = serde_json::json!({ "args": [
 //                            "--headless", 
                             "--disable-gpu", 
                             "--no-sandbox", 
@@ -227,13 +230,14 @@ pub mod cached_reqwest {
                         ] });
                         let mut caps = serde_json::map::Map::new();
                         caps.insert("goog:chromeOptions".to_string(), opts.clone());
-                        let mut c = fantoccini::Client::with_capabilities("http://localhost:9515", caps)
-                            .await
-                            .expect("failed to connect to WebDriver");
+                        let mut c =
+                            fantoccini::Client::with_capabilities("http://localhost:4444", caps)
+                                .await
+                                .expect("failed to connect to WebDriver");
                         c.goto(url).await.unwrap();
-                        c.wait_for_find(
-                            fantoccini::Locator::Css("div")
-                            ).await.unwrap();
+                        c.wait_for_find(fantoccini::Locator::Css("div"))
+                            .await
+                            .unwrap();
                         res = c.source().await.unwrap();
                         c.close().await.unwrap();
                     } else {
@@ -265,9 +269,9 @@ pub mod cached_reqwest {
         match env::current_exe() {
             Ok(exe_path) => {
                 let mut val_map = String::from("");
-                    for (key, val) in params {
-                      val_map = val_map + &(format!("{}={}", key, val))[..]
-                 }
+                for (key, val) in params {
+                    val_map = val_map + &(format!("{}={}", key, val))[..]
+                }
                 let concat_url = url.to_owned() + &val_map[..];
                 let (mut file, contents) = create_or_retrieve(concat_url, exe_path);
                 // if file is empty then cache does not exist
@@ -277,10 +281,11 @@ pub mod cached_reqwest {
                     (contents.as_str()).eq("({\"response\":null});"){
                     let res = reqwest::Client::new()
                         .post(url)
-                        .form(&params).send()
-                        .await?.text().await?;
-                    // overwrite current data
-                    file.seek(SeekFrom::Start(0))?;
+                        .form(&params)
+                        .send()
+                        .await?
+                        .text()
+                        .await?;
                     file.write_all((res.as_str()).as_bytes())?;
                     debug!("Retrieving {} [POST] data from web", url);
                     results = res;
@@ -294,7 +299,6 @@ pub mod cached_reqwest {
             }
         };
         Ok(results)
-
     }
 
     pub async fn js_post(
@@ -308,5 +312,13 @@ pub mod cached_reqwest {
             .ok()
             .unwrap()
     }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
+    #[test]
+    fn test_cli_with_clear_cache() {
+        clear_cache()
+    }
 }
